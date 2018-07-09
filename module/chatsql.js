@@ -44,12 +44,12 @@ module.exports = {
 		let content = args[2];
 		let count = args[3];
 
-		let getChatroomCtrlNameQuery = 'SELECT ctrl_name FROM tkb.chatroom WHERE chatroom_idx = ?';
+		let getChatroomCtrlNameQuery = 'SELECT ctrl_name FROM tkb.group_chatroom WHERE chatroom_idx = ?';
 		let getChatroomCtrlName = await db.queryParamCnt_Arr(getChatroomCtrlNameQuery, [chatroom_idx]);
 
 
 		let insertMessageQuery = 'INSERT INTO chatroom.' + 'chattest' + ' (u_idx, content, write_time, count, type) VALUES (?, ?, ?, ?, ?)';
-		let insertMessage = await db.queryParamCnt_Arr(insertMessageQuery, [u_idx, content, moment().format('YYYY-MM-DD HH:mm:ss', count, 0)]);
+		let insertMessage = await db.queryParamCnt_Arr(insertMessageQuery, [u_idx, content, moment().format('YYYY-MM-DD HH:mm:ss'), count, 0]);
 
 		if (!getChatroomCtrlName || !insertMessage) {
 			return false;
@@ -61,7 +61,7 @@ module.exports = {
 		let u_idx = args[0];
 		let chatroom_idx = args[1];
 
-		let getChatroomCtrlNameQuery = 'SELECT ctrl_name FROM tkb.chatroom WHERE chatroom_idx = ?';
+		let getChatroomCtrlNameQuery = 'SELECT ctrl_name FROM tkb.group_chatroom WHERE chatroom_idx = ?';
 		let getChatroomCtrlName = await db.queryParamCnt_Arr(getChatroomCtrlNameQuery, [chatroom_idx]);
 
 		let getEndPointQuery = 'SELECT endpoint FROM chatroom.endpoint WHERE u_idx = ? AND chatroom_idx = ?';
@@ -80,7 +80,7 @@ module.exports = {
 		let u_idx = args[0];
 		let chatroom_idx = args[1];
 
-		let getChatroomCtrlNameQuery = 'SELECT ctrl_name FROM tkb.chatroom WHERE chatroom_idx = ?';
+		let getChatroomCtrlNameQuery = 'SELECT ctrl_name FROM tkb.group_chatroom WHERE chatroom_idx = ?';
 		let getChatroomCtrlName = await db.queryParamCnt_Arr(getChatroomCtrlNameQuery, [chatroom_idx]);
 
 		let getEndPointQuery = 'SELECT chat_idx FROM chatroom.' + 'chattest' + ' ORDER BY chat_idx DESC LIMIT 1';
@@ -100,7 +100,7 @@ module.exports = {
 		let chatroom_idx = args[1];
 		let file = args[2];
 
-		let getChatroomCtrlNameQuery = 'SELECT ctrl_name FROM tkb.chatroom WHERE chatroom_idx = ?';
+		let getChatroomCtrlNameQuery = 'SELECT ctrl_name FROM tkb.group_chatroom WHERE chatroom_idx = ?';
 		let getChatroomCtrlName = await db.queryParamCnt_Arr(getChatroomCtrlNameQuery, [chatroom_idx]);
 
 		
@@ -119,7 +119,7 @@ module.exports = {
 	// 	let chatroom_idx = args[1];
 	// 	let fileArray = args[2];
 
-	// 	let getChatroomCtrlNameQuery = 'SELECT ctrl_name FROM tkb.chatroom WHERE chatroom_idx = ?';
+	// 	let getChatroomCtrlNameQuery = 'SELECT ctrl_name FROM tkb.group_chatroom WHERE chatroom_idx = ?';
 	// 	let getChatroomCtrlName = await db.queryParamCnt_Arr(getChatroomCtrlNameQuery, [chatroom_idx]);
 
 	// 	for (let i = 0 ; i < fileArray.length ; i++) {
@@ -131,7 +131,7 @@ module.exports = {
 		let u_idx = args[0];
 		let chatroom_idx = args[1];
 
-		let getChatroomCtrlNameQuery = 'SELECT ctrl_name FROM tkb.chatroom WHERE chatroom_idx = ?';
+		let getChatroomCtrlNameQuery = 'SELECT ctrl_name FROM tkb.group_chatroom WHERE chatroom_idx = ?';
 		let getChatroomCtrlName = await db.queryParamCnt_Arr(getChatroomCtrlNameQuery, [chatroom_idx]);
 
 		let getAllMessageQuery = 'SELECT * FROM chatroom.' + 'chattest' + ' ORDER BY chat_idx DESC';
@@ -148,7 +148,7 @@ module.exports = {
 		let chatroom_idx = args[1];
 		let page = args[2];
 
-		let getChatroomCtrlNameQuery = 'SELECT ctrl_name FROM tkb.chatroom WHERE chatroom_idx = ?';
+		let getChatroomCtrlNameQuery = 'SELECT ctrl_name FROM tkb.group_chatroom WHERE chatroom_idx = ?';
 		let getChatroomCtrlName = await db.queryParamCnt_Arr(getChatroomCtrlNameQuery, [chatroom_idx]);
 
 		let getPageMessageQuery = 'SELECT * FROM chatroom.' + 'chattest' + ' ORDER BY chat_idx DESC LIMIT ';		// 수정 필요 조금 더 생각을 해보자

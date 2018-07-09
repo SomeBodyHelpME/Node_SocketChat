@@ -52,6 +52,38 @@ root_io.sockets.on('connection', async function (socket) {
 		root_io.emit('check1', "hi");
 	});
 
+	// when the client emits 'adduser', this listens and executes
+	socket.on('enterroom', async function (data) {
+		let u_idx = data.u_idx;
+		let chatroom_idx = data.chatroom_idx;
+		
+		let result = await chatsql.enterChatroom(u_idx, chatroom_idx);
+
+		if (!result) {
+			console.log('false');
+		} else {
+			console.log('true');
+		}
+
+		root_io.emit('check1', "hi");
+	});
+
+	// when the client emits 'adduser', this listens and executes
+	socket.on('leaveroom', async function (nickname) {
+		let u_idx = data.u_idx;
+		let chatroom_idx = data.chatroom_idx;
+		
+		let result = await chatsql.leaveChatroom(u_idx, chatroom_idx);
+
+		if (!result) {
+			console.log('false');
+		} else {
+			console.log('true');
+		}
+		
+		root_io.emit('check1', "hi");
+	});
+
 	// when the client emits 'sendchat', this listens and executes
 	socket.on('sendchat', async function (data) {
 		let u_idx = data.u_idx;
