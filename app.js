@@ -66,7 +66,7 @@ root_io.sockets.on('connection', async function (socket) {
 
 });
 
-server.listen(3020, function() {
-  console.log('Socket IO server listening on port 3020 in app.js');
+server.listen(3030, function() {
+  console.log('Socket IO server listening on port 3030 in app.js');
 });
 module.exports = app;
