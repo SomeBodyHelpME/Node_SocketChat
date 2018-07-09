@@ -58,12 +58,12 @@ root_io.sockets.on('connection', async function (socket) {
 		let chatroom_idx = data.chatroom_idx;
 		let content = data.content;
 		let count = 0;
-		let type = data.type
+		let type = data.type;
 		
 		console.log("sendchat");
 		console.log(data);
 		
-		let result = chatsql.insertNewMessage(u_idx, chatroom_idx, content, count);
+		let result = await chatsql.insertNewMessage(u_idx, chatroom_idx, content, count);
 		
 		if (!result) {
 			root_io.emit('updatechat', null);	
