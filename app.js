@@ -48,8 +48,21 @@ root_io.sockets.on('connection', async function (socket) {
 	console.log('client connected');
 	// when the client emits 'adduser', this listens and executes
 	socket.on('adduser', async function (nickname) {
-		console.log(nickname);
-		root_io.emit('check1', "hi");
+		var data = JSON.parse(data);
+		let u_idx = data.u_idx;
+		let chatroom_idx = data.chatroom_idx;
+		
+		
+		console.log("updatechat");
+		console.log(data);
+		
+		let result = await chatsql.showAllMessage(u_idx, chatroom_idx);
+		
+		if (!result) {
+			root_io.emit('adduser', null);	
+		} else {
+			root_io.emit('adduser', result);	
+		}
 	});
 
 	// when the client emits 'adduser', this listens and executes
@@ -80,12 +93,13 @@ root_io.sockets.on('connection', async function (socket) {
 		} else {
 			console.log('true');
 		}
-		
+
 		root_io.emit('check1', "hi");
 	});
 
 	// when the client emits 'sendchat', this listens and executes
 	socket.on('sendchat', async function (data) {
+		var data = JSON.parse(data);
 		let u_idx = data.u_idx;
 		let chatroom_idx = data.chatroom_idx;
 		let content = data.content;
