@@ -47,7 +47,7 @@ var chatsql = require('./module/chatsql.js');
 root_io.sockets.on('connection', async function (socket) {
 	console.log('client connected');
 	// when the client emits 'adduser', this listens and executes
-	socket.on('adduser', async function (nickname) {
+	socket.on('adduser', async function (data) {
 		var data = JSON.parse(data);
 		let u_idx = data.u_idx;
 		let chatroom_idx = data.chatroom_idx;
