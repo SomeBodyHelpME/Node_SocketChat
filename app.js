@@ -42,6 +42,7 @@ app.use(function(err, req, res, next) {
 
 var server = require('http').createServer(app);
 var root_io = require('socket.io')(server);
+var chatsql = require('./module/chatsql.js');
 
 root_io.sockets.on('connection', async function (socket) {
 	console.log('client connected');
@@ -52,15 +53,25 @@ root_io.sockets.on('connection', async function (socket) {
 	});
 
 	// when the client emits 'sendchat', this listens and executes
-	socket.on('sendchat', async function (data, message) {
-		//nickname & message
+	socket.on('sendchat', async function (data) {
+		let u_idx = data.u_idx;
+		let chatroom_idx = data.chatroom_idx;
+		let content = data.content;
+		let count = 0;
+		let type = data.type
+		
 		console.log("sendchat");
 		console.log(data);
-		console.log(message);
-		// console.log(data.nickname);
-		// console.log(data.message);
-		root_io.emit('updatechat', data, message);
+		
+		let result = chatsql.insertNewMessage(u_idx, chatroom_idx, content, count);
+		
+		if (!result) {
+			root_io.emit('updatechat', null);	
+		} else {
+			root_io.emit('updatechat', data);	
+		}
 	});
+
 
 	
 
