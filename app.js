@@ -67,34 +67,37 @@ root_io.sockets.on('connection', async function (socket) {
 
 	// when the client emits 'adduser', this listens and executes
 	socket.on('enterroom', async function (data) {
+		var data = JSON.parse(data);
 		let u_idx = data.u_idx;
 		let chatroom_idx = data.chatroom_idx;
 		
+		socket.join(chatroom_idx);
+		socket.room = chatroom_idx;
+		
 		let result = await chatsql.enterChatroom(u_idx, chatroom_idx);
+		let result2 = await chatsql.showAllMessage(u_idx, chatroom_idx);
 
-		if (!result) {
-			console.log('false');
+		console.log("enterroom result : ", result);
+		if (result) {
+			root_io.in(chatroom_idx).emit('enterresult', result2);
 		} else {
-			console.log('true');
+			root_io.in(chatroom_idx).emit('enterresult', result);
 		}
-
-		root_io.emit('check1', "hi");
 	});
 
 	// when the client emits 'adduser', this listens and executes
-	socket.on('leaveroom', async function (nickname) {
+	socket.on('leaveroom', async function (data) {
+		var data = JSON.parse(data);
 		let u_idx = data.u_idx;
 		let chatroom_idx = data.chatroom_idx;
 		
 		let result = await chatsql.leaveChatroom(u_idx, chatroom_idx);
 
-		if (!result) {
-			console.log('false');
-		} else {
-			console.log('true');
-		}
+		console.log("leaveroom result : ", result);
 
-		root_io.emit('check1', "hi");
+		root_io.emit('leaveresult', result);
+
+		socket.leave(socket.room);
 	});
 
 	// when the client emits 'sendchat', this listens and executes
@@ -114,7 +117,7 @@ root_io.sockets.on('connection', async function (socket) {
 		if (!result) {
 			root_io.emit('updatechat', null);	
 		} else {
-			root_io.emit('updatechat', data);	
+			root_io.in(chatroom_idx).emit('updatechat', data);
 		}
 	});
 

@@ -17,7 +17,7 @@ const fcm = new FCM(serverKey);
 // let findUserJoinedQuery = 'SELECT g_idx FROM tkb.joined WHERE u_idx = ?';
 // let findUserJoined = await db.queryParamCnt_Arr(findUserJoinedQuery, [u_idx]);
 
-// table name : test -> getChatroomCtrlName[0].ctrl_name
+// table name : chattest -> getChatroomCtrlName[0].ctrl_name
 
 module.exports = {
 	makeNewChatroomTable : async (...args) => {
@@ -73,7 +73,7 @@ module.exports = {
 		if (!getChatroomCtrlName || !getEndPoint || !updateChatroomCount) {
 			return false;
 		} else {
-			return updateChatroomCount;
+			return true;
 		}
 	},
 	leaveChatroom : async (...args) => {
@@ -92,7 +92,7 @@ module.exports = {
 		if (!getChatroomCtrlName || !getEndPoint || !updateChatroomCount) {
 			return false;
 		} else {
-			return updateChatroomCount;
+			return true;
 		}
 	},
 	uploadSingleFile : async (...args) => {
@@ -135,7 +135,7 @@ module.exports = {
 		let getChatroomCtrlName = await db.queryParamCnt_Arr(getChatroomCtrlNameQuery, [chatroom_idx]);
 
 		let getAllMessageQuery = 'SELECT * FROM chatroom.' + 'chattest' + ' ORDER BY chat_idx DESC';
-		let getAllMessage = await db.queryParamCnt_None(getAllMessageQuery)
+		let getAllMessage = await db.queryParamCnt_None(getAllMessageQuery);
 
 		if (!getChatroomCtrlName || !getAllMessage) {
 			return false;
@@ -152,7 +152,7 @@ module.exports = {
 		let getChatroomCtrlName = await db.queryParamCnt_Arr(getChatroomCtrlNameQuery, [chatroom_idx]);
 
 		let getPageMessageQuery = 'SELECT * FROM chatroom.' + 'chattest' + ' ORDER BY chat_idx DESC LIMIT ';		// 수정 필요 조금 더 생각을 해보자
-		let getPageMessage = await db.queryParamCnt_None(getAllMessageQuery)
+		let getPageMessage = await db.queryParamCnt_None(getAllMessageQuery);
 		
 		if (!getChatroomCtrlName || !getPageMessage) {
 			return false;
