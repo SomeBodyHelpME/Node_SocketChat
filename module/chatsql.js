@@ -20,24 +20,24 @@ const fcm = new FCM(serverKey);
 // table name : chattest -> getChatroomCtrlName[0].ctrl_name
 
 module.exports = {
-	makeNewChatroomTable : async (...args) => {
-		let ctrl_name = args[0];
+	// makeNewChatroomTable : async (...args) => {
+	// 	let ctrl_name = args[0];
 
-		let createTableQuery = `
-		CREATE TABLE IF NOT EXISTS chatroom.` + ctrl_name + ` (
-      chat_idx INT(11) NOT NULL AUTO_INCREMENT,
-      content TEXT NULL DEFAULT NULL,
-      write_time VARCHAR(45) NULL DEFAULT NULL,
-      count INT(11) NULL DEFAULT NULL,
-      u_idx INT(11) NULL DEFAULT NULL,
-      type INT(11) NULL DEFAULT NULL,
-      PRIMARY KEY (chat_idx))
-    ENGINE = InnoDB
-    DEFAULT CHARACTER SET = utf8`;
-    let createTable = await db.queryParamCnt_None(createTableQuery);
-    console.log(createTable);
-    return createTable;
-	},
+	// 	let createTableQuery = `
+	// 	CREATE TABLE IF NOT EXISTS chatroom.` + ctrl_name + ` (
+ //      chat_idx INT(11) NOT NULL AUTO_INCREMENT,
+ //      content TEXT NULL DEFAULT NULL,
+ //      write_time VARCHAR(45) NULL DEFAULT NULL,
+ //      count INT(11) NULL DEFAULT NULL,
+ //      u_idx INT(11) NULL DEFAULT NULL,
+ //      type INT(11) NULL DEFAULT NULL,
+ //      PRIMARY KEY (chat_idx))
+ //    ENGINE = InnoDB
+ //    DEFAULT CHARACTER SET = utf8`;
+ //    let createTable = await db.queryParamCnt_None(createTableQuery);
+ //    console.log(createTable);
+ //    return createTable;
+	// },
 	insertNewMessage : async (...args) => {
 		let u_idx = args[0];
 		let chatroom_idx = args[1];
@@ -64,11 +64,11 @@ module.exports = {
 		let getChatroomCtrlNameQuery = 'SELECT ctrl_name FROM tkb.group_chatroom WHERE chatroom_idx = ?';
 		let getChatroomCtrlName = await db.queryParamCnt_Arr(getChatroomCtrlNameQuery, [chatroom_idx]);
 
-		let getEndPointQuery = 'SELECT endpoint FROM chatroom.endpoint WHERE u_idx = ? AND chatroom_idx = ?';
+		let getEndPointQuery = 'SELECT value FROM chatroom.endpoint WHERE u_idx = ? AND chatroom_idx = ?';
 		let getEndPoint = await db.queryParamCnt_Arr(getEndPointQuery, [u_idx, chatroom_idx]);
 
 		let updateChatroomCountQuery = 'UPDATE chatroom.' + getChatroomCtrlName[0].ctrl_name + ' SET count = count - 1 WHERE chat_idx > ?';
-		let updateChatroomCount = await db.queryParamCnt_Arr(updateChatroomCountQuery, [getEndPoint[0].endpoint]);
+		let updateChatroomCount = await db.queryParamCnt_Arr(updateChatroomCountQuery, [getEndPoint[0].value]);
 
 		if (!getChatroomCtrlName || !getEndPoint || !updateChatroomCount) {
 			return false;
@@ -87,7 +87,7 @@ module.exports = {
 		let getEndPoint = await db.queryParamCnt_Arr(getEndPointQuery, [u_idx, chatroom_idx]);
 
 		let updateChatroomCountQuery = 'UPDATE chatroom.' + getChatroomCtrlName[0].ctrl_name + ' SET count = count - 1 WHERE chat_idx > ?';
-		let updateChatroomCount = await db.queryParamCnt_Arr(updateChatroomCountQuery, [getEndPoint[0].endpoint]);
+		let updateChatroomCount = await db.queryParamCnt_Arr(updateChatroomCountQuery, [getEndPoint[0].chat_idx]);
 
 		if (!getChatroomCtrlName || !getEndPoint || !updateChatroomCount) {
 			return false;
