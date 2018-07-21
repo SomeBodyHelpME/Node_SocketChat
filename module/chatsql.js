@@ -43,18 +43,25 @@ module.exports = {
 		let chatroom_idx = args[1];
 		let content = args[2];
 		let count = args[3];
-
+		let write_time = moment().format('YYYY-MM-DD HH:mm:ss');
 		let getChatroomCtrlNameQuery = 'SELECT ctrl_name FROM tkb.group_chatroom WHERE chatroom_idx = ?';
 		let getChatroomCtrlName = await db.queryParamCnt_Arr(getChatroomCtrlNameQuery, [chatroom_idx]);
 
 
 		let insertMessageQuery = 'INSERT INTO chatroom.' + getChatroomCtrlName[0].ctrl_name + ' (u_idx, content, write_time, count, type) VALUES (?, ?, ?, ?, ?)';
-		let insertMessage = await db.queryParamCnt_Arr(insertMessageQuery, [u_idx, content, moment().format('YYYY-MM-DD HH:mm:ss'), count, 0]);
+		let insertMessage = await db.queryParamCnt_Arr(insertMessageQuery, [u_idx, content, write_time, count, 0]);
 
 		if (!getChatroomCtrlName || !insertMessage) {
 			return false;
 		} else {
-			return insertMessage;
+			return {
+				"chat_idx" : insertMessage.insertId,
+				"content" : content,
+				"write_time" : write_time,
+				"count" : count,
+				"u_idx" : u_idx,
+				"type" : type
+			};
 		}
 	},
 	enterChatroom : async (...args) => {
@@ -86,13 +93,17 @@ module.exports = {
 		let getEndPointQuery = 'SELECT chat_idx FROM chatroom.' + getChatroomCtrlName[0].ctrl_name + ' ORDER BY chat_idx DESC LIMIT 1';
 		let getEndPoint = await db.queryParamCnt_Arr(getEndPointQuery, [u_idx, chatroom_idx]);
 
-		let updateChatroomCountQuery = 'UPDATE chatroom.' + getChatroomCtrlName[0].ctrl_name + ' SET count = count - 1 WHERE chat_idx > ?';
-		let updateChatroomCount = await db.queryParamCnt_Arr(updateChatroomCountQuery, [getEndPoint[0].chat_idx]);
-
 		if (!getChatroomCtrlName || !getEndPoint || !updateChatroomCount) {
 			return false;
 		} else {
-			return true;
+			if (getEndPoint.length === 0) {
+				return true;
+			} else {
+				let updateEndPointQuery = 'UPDATE chatroom.endpoint SET value = ? WHERE u_idx = ? AND chatroom_idx = ?';
+				let updateEndPoint = await db.queryParamCnt_Arr(updateEndPointQuery, [getEndPoint[0].chat_idx, u_idx, chatroom_idx]);
+
+				return true;
+			}
 		}
 	},
 	uploadSingleFile : async (...args) => {

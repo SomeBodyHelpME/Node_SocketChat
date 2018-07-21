@@ -117,7 +117,7 @@ root_io.sockets.on('connection', async function (socket) {
 		if (!result) {
 			root_io.emit('updatechat', null);	
 		} else {
-			root_io.in(chatroom_idx).emit('updatechat', data);
+			root_io.in(chatroom_idx).emit('updatechat', result);
 		}
 	});
 
