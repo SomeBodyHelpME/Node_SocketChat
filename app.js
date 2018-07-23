@@ -59,9 +59,9 @@ root_io.sockets.on('connection', async function (socket) {
 		let result = await chatsql.showAllMessage(u_idx, chatroom_idx);
 		
 		if (!result) {
-			root_io.emit('adduser', null);	
+			socket.emit('adduser', null);	
 		} else {
-			root_io.emit('adduser', result);	
+			socket.emit('adduser', result);	
 		}
 	});
 
@@ -79,9 +79,9 @@ root_io.sockets.on('connection', async function (socket) {
 
 		console.log("enterroom result : ", result);
 		if (result) {
-			root_io.in(chatroom_idx).emit('enterresult', result2);
+			socket.emit('enterresult', result2);
 		} else {
-			root_io.in(chatroom_idx).emit('enterresult', result);
+			socket.emit('enterresult', result);
 		}
 	});
 
@@ -95,7 +95,7 @@ root_io.sockets.on('connection', async function (socket) {
 
 		console.log("leaveroom result : ", result);
 
-		root_io.emit('leaveresult', result);
+		socket.emit('leaveresult', result);
 
 		socket.leave(socket.room);
 	});
@@ -108,14 +108,13 @@ root_io.sockets.on('connection', async function (socket) {
 		let content = data.content;
 		let count = 0;
 		let type = data.type;
-		
-		console.log("sendchat");
-		console.log(data);
+				
+		console.log("sendchat data : ", data);
 		
 		let result = await chatsql.insertNewMessage(u_idx, chatroom_idx, content, count);
-		
+		console.log("sendchat result : ", result);
 		if (!result) {
-			root_io.emit('updatechat', null);	
+			root_io.in(chatroom_idx).emit('updatechat', null);
 		} else {
 			root_io.in(chatroom_idx).emit('updatechat', result);
 		}
