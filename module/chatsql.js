@@ -76,14 +76,14 @@ module.exports = {
 		let getEndPointQuery = 'SELECT value FROM chatroom.endpoint WHERE u_idx = ? AND chatroom_idx = ?';
 		let getEndPoint = await db.queryParamCnt_Arr(getEndPointQuery, [u_idx, chatroom_idx]);
 
-		let updateChatroomCountQuery = 'UPDATE chatroom.' + getChatroomCtrlName[0].ctrl_name + ' SET count = count - 1 WHERE chat_idx > ?';
-		let updateChatroomCount = await db.queryParamCnt_Arr(updateChatroomCountQuery, [getEndPoint[0].value]);
-
-		if (!getChatroomCtrlName || !getEndPoint || !updateChatroomCount) {
+		if (!getChatroomCtrlName || !getEndPoint || !getEndPoint || getEndPoint.length === 0) {
 			return false;
 		} else {
+			let updateChatroomCountQuery = 'UPDATE chatroom.' + getChatroomCtrlName[0].ctrl_name + ' SET count = count - 1 WHERE chat_idx > ?';
+			let updateChatroomCount = await db.queryParamCnt_Arr(updateChatroomCountQuery, [getEndPoint[0].value]);
+
 			return true;
-		}
+		}		
 	},
 	leaveChatroom : async (...args) => {
 		let u_idx = args[0];
@@ -95,7 +95,7 @@ module.exports = {
 		let getEndPointQuery = 'SELECT chat_idx FROM chatroom.' + getChatroomCtrlName[0].ctrl_name + ' ORDER BY chat_idx DESC LIMIT 1';
 		let getEndPoint = await db.queryParamCnt_Arr(getEndPointQuery, [u_idx, chatroom_idx]);
 
-		if (!getChatroomCtrlName || !getEndPoint || !updateChatroomCount) {
+		if (!getChatroomCtrlName || !getEndPoint) {
 			return false;
 		} else {
 			if (getEndPoint.length === 0) {
