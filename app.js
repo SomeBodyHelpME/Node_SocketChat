@@ -111,7 +111,7 @@ root_io.sockets.on('connection', async function (socket) {
 				
 		console.log("sendchat data : ", data);
 		
-		let result = await chatsql.insertNewMessage(u_idx, chatroom_idx, content, count);
+		let result = await chatsql.insertNewMessage(u_idx, chatroom_idx, content, count, type);
 		console.log("sendchat result : ", result);
 		if (!result) {
 			root_io.in(chatroom_idx).emit('updatechat', null);

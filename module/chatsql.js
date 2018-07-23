@@ -43,13 +43,15 @@ module.exports = {
 		let chatroom_idx = args[1];
 		let content = args[2];
 		let count = args[3];
+		let type = args[4];
 		let write_time = moment().format('YYYY-MM-DD HH:mm:ss');
+
 		let getChatroomCtrlNameQuery = 'SELECT ctrl_name FROM tkb.group_chatroom WHERE chatroom_idx = ?';
 		let getChatroomCtrlName = await db.queryParamCnt_Arr(getChatroomCtrlNameQuery, [chatroom_idx]);
 
 
 		let insertMessageQuery = 'INSERT INTO chatroom.' + getChatroomCtrlName[0].ctrl_name + ' (u_idx, content, write_time, count, type) VALUES (?, ?, ?, ?, ?)';
-		let insertMessage = await db.queryParamCnt_Arr(insertMessageQuery, [u_idx, content, write_time, count, 0]);
+		let insertMessage = await db.queryParamCnt_Arr(insertMessageQuery, [u_idx, content, write_time, count, type]);
 
 		if (!getChatroomCtrlName || !insertMessage) {
 			return false;
