@@ -73,7 +73,8 @@ root_io.sockets.on('connection', async function (socket) {
 		
 		socket.join(chatroom_idx);
 		socket.room = chatroom_idx;
-		
+		socket.userlist.push(u_idx);
+		console.log("after userlist push", socket.userlist);
 		let result = await chatsql.enterChatroom(u_idx, chatroom_idx);
 		let result2 = await chatsql.showAllMessage(u_idx, chatroom_idx);
 
@@ -98,6 +99,12 @@ root_io.sockets.on('connection', async function (socket) {
 		socket.emit('leaveresult', result);
 
 		socket.leave(socket.room);
+		console.log("before userlist splice : ", socket.userlist);
+		const idx = socket.userlist.indexOf(u_idx);
+		if (idx > -1)
+			socket.userlist.splice(idx, 1);
+		console.log("after userlist splice : ", socket.userlist);
+
 	});
 
 	// when the client emits 'sendchat', this listens and executes
