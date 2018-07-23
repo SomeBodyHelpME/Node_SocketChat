@@ -147,7 +147,7 @@ module.exports = {
 		let getChatroomCtrlNameQuery = 'SELECT ctrl_name FROM tkb.group_chatroom WHERE chatroom_idx = ?';
 		let getChatroomCtrlName = await db.queryParamCnt_Arr(getChatroomCtrlNameQuery, [chatroom_idx]);
 
-		let getAllMessageQuery = 'SELECT * FROM chatroom.' + getChatroomCtrlName[0].ctrl_name + ' ORDER BY chat_idx DESC';
+		let getAllMessageQuery = 'SELECT * FROM chatroom.' + getChatroomCtrlName[0].ctrl_name + ' ORDER BY chat_idx ASC';
 		let getAllMessage = await db.queryParamCnt_None(getAllMessageQuery);
 
 		if (!getChatroomCtrlName || !getAllMessage) {
