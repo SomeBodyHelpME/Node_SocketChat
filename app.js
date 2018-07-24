@@ -73,7 +73,7 @@ root_io.sockets.on('connection', async function (socket) {
 		
 		socket.join(chatroom_idx);
 		socket.room = chatroom_idx;
-		socket.userlist.push(u_idx);
+		console.log("과연", root_io.sockets.clients(chatroom_idx));
 		console.log("after userlist push", socket.userlist);
 		let result = await chatsql.enterChatroom(u_idx, chatroom_idx);
 		let result2 = await chatsql.showAllMessage(u_idx, chatroom_idx);
