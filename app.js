@@ -73,12 +73,12 @@ root_io.sockets.on('connection', async function (socket) {
 		
 		socket.join(chatroom_idx);
 		socket.room = chatroom_idx;
-		console.log("과연", root_io.sockets.clients(chatroom_idx));
-		console.log("after userlist push", socket.userlist);
+		
+		
 		let result = await chatsql.enterChatroom(u_idx, chatroom_idx);
 		let result2 = await chatsql.showAllMessage(u_idx, chatroom_idx);
 
-		console.log("enterroom result : ", result);
+		console.log("enterroom result : ", socket.conn.server.clientsCount);
 		if (result) {
 			socket.emit('enterresult', result2);
 		} else {
@@ -99,11 +99,11 @@ root_io.sockets.on('connection', async function (socket) {
 		socket.emit('leaveresult', result);
 
 		socket.leave(socket.room);
-		console.log("before userlist splice : ", socket.userlist);
-		const idx = socket.userlist.indexOf(u_idx);
-		if (idx > -1)
-			socket.userlist.splice(idx, 1);
-		console.log("after userlist splice : ", socket.userlist);
+		// console.log("before userlist splice : ", socket.userlist);
+		// const idx = socket.userlist.indexOf(u_idx);
+		// if (idx > -1)
+		// 	socket.userlist.splice(idx, 1);
+		// console.log("after userlist splice : ", socket.userlist);
 
 	});
 
@@ -113,9 +113,10 @@ root_io.sockets.on('connection', async function (socket) {
 		let u_idx = data.u_idx;
 		let chatroom_idx = data.chatroom_idx;
 		let content = data.content;
-		let count = 0;
+		let count = socket.conn.server.clientsCount;
 		let type = data.type;
-				
+		
+		console.log("count : ", count);
 		console.log("sendchat data : ", data);
 		
 		let result = await chatsql.insertNewMessage(u_idx, chatroom_idx, content, count, type);

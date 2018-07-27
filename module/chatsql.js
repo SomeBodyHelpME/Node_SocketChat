@@ -46,21 +46,24 @@ module.exports = {
 		let type = args[4];
 		let write_time = moment().format('YYYY-MM-DD HH:mm:ss');
 
+		let getAllMemberCountQuery = 'SELECT count(*) AS count FROM tkb.chatroom_joined WHERE chatroom_idx = ?';
+		let getAllMemberCount = await db.queryParamCnt_Arr(getAllMemberCountQuery, [chatroom_idx]);
+
 		let getChatroomCtrlNameQuery = 'SELECT ctrl_name FROM tkb.group_chatroom WHERE chatroom_idx = ?';
 		let getChatroomCtrlName = await db.queryParamCnt_Arr(getChatroomCtrlNameQuery, [chatroom_idx]);
 
 
 		let insertMessageQuery = 'INSERT INTO chatroom.' + getChatroomCtrlName[0].ctrl_name + ' (u_idx, content, write_time, count, type) VALUES (?, ?, ?, ?, ?)';
-		let insertMessage = await db.queryParamCnt_Arr(insertMessageQuery, [u_idx, content, write_time, count, type]);
+		let insertMessage = await db.queryParamCnt_Arr(insertMessageQuery, [u_idx, content, write_time, getAllMemberCount[0].count - count, type]);
 
-		if (!getChatroomCtrlName || !insertMessage) {
+		if (!getAllMemberCount || !getChatroomCtrlName || !insertMessage) {
 			return false;
 		} else {
 			return {
 				"chat_idx" : insertMessage.insertId,
 				"content" : content,
 				"write_time" : write_time,
-				"count" : count,
+				"count" : getAllMemberCount[0].count - count,
 				"u_idx" : u_idx,
 				"type" : type
 			};
