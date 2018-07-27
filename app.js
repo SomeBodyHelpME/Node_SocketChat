@@ -80,9 +80,9 @@ root_io.sockets.on('connection', async function (socket) {
 
 		console.log("enterroom result : ", socket.conn.server.clientsCount);
 		if (result) {
-			socket.emit('enterresult', result2);
+			root_io.in(chatroom_idx).emit('enterresult', result2);
 		} else {
-			socket.emit('enterresult', result);
+			root_io.in(chatroom_idx).emit('enterresult', result);
 		}
 	});
 
