@@ -96,7 +96,7 @@ module.exports = {
 		let getChatroomCtrlName = await db.queryParamCnt_Arr(getChatroomCtrlNameQuery, [chatroom_idx]);
 
 		let getEndPointQuery = 'SELECT chat_idx FROM chatroom.' + getChatroomCtrlName[0].ctrl_name + ' ORDER BY chat_idx DESC LIMIT 1';
-		let getEndPoint = await db.queryParamCnt_Arr(getEndPointQuery, [u_idx, chatroom_idx]);
+		let getEndPoint = await db.queryParamCnt_None(getEndPointQuery);
 
 		if (!getChatroomCtrlName || !getEndPoint) {
 			return false;
