@@ -44,99 +44,152 @@ var server = require('http').createServer(app);
 var root_io = require('socket.io')(server);
 var chatsql = require('./module/chatsql.js');
 
-root_io.sockets.on('connection', async function (socket) {
-	console.log('client connected');
-	// when the client emits 'adduser', this listens and executes
-	socket.on('adduser', async function (data) {
-		var data = JSON.parse(data);
-		let u_idx = data.u_idx;
-		let chatroom_idx = data.chatroom_idx;
-		
-		
-		console.log("updatechat");
-		console.log(data);
-		
-		let result = await chatsql.showAllMessage(u_idx, chatroom_idx);
-		
-		if (!result) {
-			socket.emit('adduser', null);	
-		} else {
-			socket.emit('adduser', result);	
-		}
-	});
 
-	// when the client emits 'adduser', this listens and executes
-	socket.on('enterroom', async function (data) {
-		var data = JSON.parse(data);
-		let u_idx = data.u_idx;
-		let chatroom_idx = data.chatroom_idx;
+var url = require('url');
+var ev = new events.EventEmitter();
+
+// <ns name>: <ns regexp>
+var routes = {
+  // /:something
+  'default': '^\\/(\\\w+)$'
+};
+
+// global entry point for new connections
+root_io.sockets.on('connection', function (socket) {
+  // extract namespace from connected url query param 'ns'
+  var ns = url.parse(socket.handshake.url, true).query.ns;
+  console.log('connected ns: '+ns);
+
+  //
+  for (var k in routes) {
+    var routeName = k;
+    var routeRegexp = new RegExp(routes[k]);
+
+    // if connected ns matched with route regexp
+    if (ns.match(routeRegexp)) {
+      console.log('matched: '+routeName)
+
+      // create new namespace (or use previously created)
+      root_io.of(ns).on('connection', function (socket) {
+        // fire event when socket connecting
+        ev.emit('socket.connection route.'+routeName, socket);
+
+        // @todo: add more if needed
+        // on('message') -> ev.emit(...)
+      });
+
+      break;
+    }
+  }
+
+  // when nothing matched
+  // ...
+});
+
+// event when socket connected in 'user' namespace
+ev.on('socket.connection route.user', function () {
+  console.log('route[user] connecting..');
+});
+
+// event when socket connected in 'default' namespace
+ev.on('socket.connection route.default', function () {
+  console.log('route[default] connecting..');
+});
+
+
+// root_io.sockets.on('connection', async function (socket) {
+// 	console.log('client connected');
+// 	// when the client emits 'adduser', this listens and executes
+// 	socket.on('adduser', async function (data) {
+// 		var data = JSON.parse(data);
+// 		let u_idx = data.u_idx;
+// 		let chatroom_idx = data.chatroom_idx;
 		
-		socket.join(chatroom_idx);
-		socket.room = chatroom_idx;
 		
-		if (!socket.userlist) {
-			socket.userlist = [u_idx];
-		} else {
-			socket.userlist.push(u_idx);
-		}
+// 		console.log("updatechat");
+// 		console.log(data);
 		
-		let result = await chatsql.enterChatroom(u_idx, chatroom_idx);
-		let result2 = await chatsql.showAllMessage(u_idx, chatroom_idx);
-
-		console.log("enterroom result : ", socket.conn.server.clientsCount);
-		if (result) {
-			root_io.in(chatroom_idx).emit('enterresult', result2);
-		} else {
-			root_io.in(chatroom_idx).emit('enterresult', result);
-		}
-	});
-
-	// when the client emits 'adduser', this listens and executes
-	socket.on('leaveroom', async function (data) {
-		var data = JSON.parse(data);
-		let u_idx = data.u_idx;
-		let chatroom_idx = data.chatroom_idx;
+// 		let result = await chatsql.showAllMessage(u_idx, chatroom_idx);
 		
-		let result = await chatsql.leaveChatroom(u_idx, chatroom_idx);
+// 		if (!result) {
+// 			socket.emit('adduser', null);	
+// 		} else {
+// 			socket.emit('adduser', result);	
+// 		}
+// 	});
 
-		console.log("leaveroom result : ", result);
-
-		socket.emit('leaveresult', result);
-
-		socket.leave(socket.room);
-		console.log("before userlist splice : ", socket.userlist);
-		const idx = socket.userlist.indexOf(u_idx);
-		if (idx > -1)
-			socket.userlist.splice(idx, 1);
-		console.log("after userlist splice : ", socket.userlist);
-
-	});
-
-	// when the client emits 'sendchat', this listens and executes
-	socket.on('sendchat', async function (data) {
-		var data = JSON.parse(data);
-		let u_idx = data.u_idx;
-		let chatroom_idx = data.chatroom_idx;
-		let content = data.content;
-		let count = socket.conn.server.clientsCount;
-		let type = data.type;
+// 	// when the client emits 'adduser', this listens and executes
+// 	socket.on('enterroom', async function (data) {
+// 		var data = JSON.parse(data);
+// 		let u_idx = data.u_idx;
+// 		let chatroom_idx = data.chatroom_idx;
 		
-		console.log("count : ", count);
-		console.log("sendchat data : ", data);
+// 		socket.join(chatroom_idx);
+// 		socket.room = chatroom_idx;
 		
-		let result = await chatsql.insertNewMessage(u_idx, chatroom_idx, content, count, type);
-		console.log("sendchat result : ", result);
-		if (!result) {
-			root_io.in(chatroom_idx).emit('updatechat', null);
-		} else {
-			root_io.in(chatroom_idx).emit('updatechat', result);
-		}
-	});
+// 		if (!socket.userlist) {
+// 			socket.userlist = [u_idx];
+// 		} else {
+// 			socket.userlist.push(u_idx);
+// 		}
+		
+// 		let result = await chatsql.enterChatroom(u_idx, chatroom_idx);
+// 		let result2 = await chatsql.showAllMessage(u_idx, chatroom_idx);
+
+// 		console.log("enterroom result : ", socket.conn.server.clientsCount);
+// 		if (result) {
+// 			root_io.in(chatroom_idx).emit('enterresult', result2);
+// 		} else {
+// 			root_io.in(chatroom_idx).emit('enterresult', result);
+// 		}
+// 	});
+
+// 	// when the client emits 'adduser', this listens and executes
+// 	socket.on('leaveroom', async function (data) {
+// 		var data = JSON.parse(data);
+// 		let u_idx = data.u_idx;
+// 		let chatroom_idx = data.chatroom_idx;
+		
+// 		let result = await chatsql.leaveChatroom(u_idx, chatroom_idx);
+
+// 		console.log("leaveroom result : ", result);
+
+// 		socket.emit('leaveresult', result);
+
+// 		socket.leave(socket.room);
+// 		console.log("before userlist splice : ", socket.userlist);
+// 		const idx = socket.userlist.indexOf(u_idx);
+// 		if (idx > -1)
+// 			socket.userlist.splice(idx, 1);
+// 		console.log("after userlist splice : ", socket.userlist);
+
+// 	});
+
+// 	// when the client emits 'sendchat', this listens and executes
+// 	socket.on('sendchat', async function (data) {
+// 		var data = JSON.parse(data);
+// 		let u_idx = data.u_idx;
+// 		let chatroom_idx = data.chatroom_idx;
+// 		let content = data.content;
+// 		let count = socket.conn.server.clientsCount;
+// 		let type = data.type;
+		
+// 		console.log("count : ", count);
+// 		console.log("sendchat data : ", data);
+		
+// 		let result = await chatsql.insertNewMessage(u_idx, chatroom_idx, content, count, type);
+// 		console.log("sendchat result : ", result);
+// 		if (!result) {
+// 			root_io.in(chatroom_idx).emit('updatechat', null);
+// 		} else {
+// 			root_io.in(chatroom_idx).emit('updatechat', result);
+// 		}
+// 	});
 
 
 	
 
-});
+// });
 
 server.listen(3030, function() {
   console.log('Socket IO server listening on port 3030 in app.js');
