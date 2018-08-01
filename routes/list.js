@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const sql = require('../module/sql.js');
-const jwt = require('../../module/jwt.js');
+const jwt = require('../module/jwt.js');
 
 router.get('/:g_idx', async(req, res) => {
 	let token = req.headers.token;
