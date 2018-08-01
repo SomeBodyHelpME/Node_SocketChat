@@ -74,6 +74,11 @@ root_io.sockets.on('connection', async function (socket) {
 		socket.join(chatroom_idx);
 		socket.room = chatroom_idx;
 		
+		if (!socket.userlist) {
+			socket.userlist = [u_idx];
+		} else {
+			socket.userlist.push(u_idx);
+		}
 		
 		let result = await chatsql.enterChatroom(u_idx, chatroom_idx);
 		let result2 = await chatsql.showAllMessage(u_idx, chatroom_idx);
@@ -99,11 +104,11 @@ root_io.sockets.on('connection', async function (socket) {
 		socket.emit('leaveresult', result);
 
 		socket.leave(socket.room);
-		// console.log("before userlist splice : ", socket.userlist);
-		// const idx = socket.userlist.indexOf(u_idx);
-		// if (idx > -1)
-		// 	socket.userlist.splice(idx, 1);
-		// console.log("after userlist splice : ", socket.userlist);
+		console.log("before userlist splice : ", socket.userlist);
+		const idx = socket.userlist.indexOf(u_idx);
+		if (idx > -1)
+			socket.userlist.splice(idx, 1);
+		console.log("after userlist splice : ", socket.userlist);
 
 	});
 
