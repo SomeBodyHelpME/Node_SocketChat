@@ -52,7 +52,7 @@ module.exports = {
     let getChatroomCtrlName = await db.queryParamCnt_Arr(getChatroomCtrlNameQuery, [findUserJoined[i].chatroom_idx]);
 
     let getLastMessageQuery = 'SELECT * FROM chatroom.' + getChatroomCtrlName[0].ctrl_name + ' ORDER BY chat_idx DESC LIMIT 1';
-    let getLastMessage = await db.queryParamCnt_None(getLastMessageQuery]);
+    let getLastMessage = await db.queryParamCnt_None(getLastMessageQuery);
 
     if (getChatroomCtrlName && getLastMessage && getLastMessage.length > 0) {
       getLastMessage[0].chatroom_idx = findUserJoined[i].chatroom_idx;
