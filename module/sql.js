@@ -2,6 +2,7 @@ const moment = require('moment');
 
 const pool = require('../config/dbPool.js');
 const db = require('./pool.js');
+const statuscode = require('./statuscode.js');
 
 // FCM
 const FCM = require('fcm-node');
@@ -58,6 +59,49 @@ module.exports = {
       return getLastMessage[0];
     } else {
       return false;
+    }
+  },
+  fcmSendWhenMakeThings : async (...args) => {
+    let u_idx = args[0];
+    let chatroom_idx = args[1];
+    let status = args[2];
+
+    let getUsersListInGroupQuery = 'SELECT u_idx FROM tkb.chatroom_joined WHERE chatroom_idx = ? AND u_idx != ?';
+    var getUsersListInGroup = await db.queryParamCnt_Arr(getUsersListInGroupQuery, [chatroom_idx, u_idx]);
+
+    if (getUsersListInGroup) {
+      for(let i = 0 ; i < getUsersListInGroup.length ; i++) {
+        let getUsersTokenQuery = 'SELECT token FROM tkb.user WHERE u_idx = ?';
+        var getUsersToken = await db.queryParamCnt_Arr(getUsersTokenQuery, [getUsersListInGroup[i].u_idx]);
+        
+        if (getUsersToken) {
+          let client_token = getUsersToken[0].token;
+
+
+          var message = { //this may vary according to the message type (single recipient, multicast, topic, et cetera)
+              to: client_token,
+              data: {
+                data : status
+              },
+              priority: "high",
+              content_available: true
+          };
+
+          fcm.send(message, function(err, response) {
+            if(err) {
+              console.log("Something has gone wrong!", err);
+            } else {
+              console.log("Successfully sent with response: ", response);
+            }
+          });//fcm.send
+        }
+      }
+    }
+   
+    if (!getUsersListInGroup) {
+      return false;
+    } else {
+      return true;
     }
   }
 };

@@ -4,6 +4,7 @@ const moment = require('moment');
 
 const upload = require('../config/multer');
 const db = require('../module/pool.js');
+const statuscode = require('../module/statuscode.js');
 
 router.post('/photo/single', upload.single('photo'), async(req, res, next) => {
 	var photo = null;
@@ -35,6 +36,7 @@ router.post('/photo/single', upload.single('photo'), async(req, res, next) => {
 					message : "Internal Server Error"
 				});
 			} else {
+				let result = await sql.fcmSendWhenMakeThings(u_idx, chatroom_idx, statuscode.uploadSinglePhoto);
 				res.status(201).send({
 					message : "Success to Store Single Photo"
 				});	
@@ -77,6 +79,7 @@ router.post('/photo/array', upload.array('photo'), async(req, res, next) => {
 					message : "Internal Server Error"
 				});
 			} else {
+				let result = await sql.fcmSendWhenMakeThings(u_idx, chatroom_idx, statuscode.uploadMultiplePhoto);
 				res.status(201).send({
 					message : "Success to Store Photo Array"
 				});
@@ -115,8 +118,9 @@ router.post('/file', upload.single('file'), async(req, res, next) => {
 					message : "Internal Server Error"
 				});
 			} else {
+				let result = await sql.fcmSendWhenMakeThings(u_idx, chatroom_idx, statuscode.uploadFile);
 				res.status(201).send({
-					message : "Success to Store Single Photo"
+					message : "Success to Store File"
 				});	
 			}
 		}
@@ -153,8 +157,9 @@ router.post('/video', upload.single('video'), async(req, res, next) => {
 					message : "Internal Server Error"
 				});
 			} else {
+				let result = await sql.fcmSendWhenMakeThings(u_idx, chatroom_idx, statuscode.uploadVideo);
 				res.status(201).send({
-					message : "Success to Store Single Photo"
+					message : "Success to Store Video"
 				});	
 			}
 		}
