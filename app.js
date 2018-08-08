@@ -42,7 +42,8 @@ app.use(function(err, req, res, next) {
 
 var server = require('http').createServer(app);
 var root_io = require('socket.io')(server);
-var chatsql = require('./module/chatsql.js');
+const chatsql = require('./module/chatsql.js');
+const statuscode = require('./module/statuscode.js');
 
 root_io.sockets.on('connection', async function (socket) {
 	console.log('client connected');
@@ -125,10 +126,13 @@ root_io.sockets.on('connection', async function (socket) {
 		console.log("sendchat data : ", data);
 		
 		let result = await chatsql.insertNewMessage(u_idx, chatroom_idx, content, count, type);
+
 		console.log("sendchat result : ", result);
 		if (!result) {
 			root_io.in(chatroom_idx).emit('updatechat', null);
 		} else {
+			let result2 = await chatsql.fcmSendWhenMakeMessage(u_idx, chatroom_idx, statuscode.uploadMessage, result.chat_idx, result.chat_idx);
+    
 			root_io.in(chatroom_idx).emit('updatechat', result);
 		}
 	});

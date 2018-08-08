@@ -38,6 +38,63 @@ module.exports = {
  //    console.log(createTable);
  //    return createTable;
 	// },
+  fcmSendWhenMakeMessage : async (...args) => {
+    let u_idx = args[0];
+    let chatroom_idx = args[1];
+    let status = args[2];
+    let index = args[3];
+    let chat_idx = args[4];
+    var flag = true;
+		
+		let getAllChatroomIndexQuery = 'SELECT chatroom_idx FROM tkb.chatroom_joined WHERE u_idx = ?';
+		let getAllChatroomIndex = await db.queryParamCnt_Arr(getAllChatroomIndexQuery, [u_idx]);
+
+		if (getAllChatroomIndex) {
+			for (let i = 0 ; i < getAllChatroomIndex.length ; i++) {
+				let getUsersListInGroupQuery = 'SELECT u_idx FROM tkb.chatroom_joined WHERE chatroom_idx = ? AND u_idx != ?';
+		    var getUsersListInGroup = await db.queryParamCnt_Arr(getUsersListInGroupQuery, [chatroom_idx, u_idx]);
+
+		    if (getUsersListInGroup) {
+		      for (let i = 0 ; i < getUsersListInGroup.length ; i++) {
+		        let getUsersTokenQuery = 'SELECT token FROM tkb.user WHERE u_idx = ?';
+		        var getUsersToken = await db.queryParamCnt_Arr(getUsersTokenQuery, [getUsersListInGroup[i].u_idx]);
+		        
+		        if (getUsersToken) {
+		          let client_token = getUsersToken[0].token;
+
+		          var message = { //this may vary according to the message type (single recipient, multicast, topic, et cetera)
+		              to: client_token,
+		              data: {
+		                status : status,
+		                chatroom_idx : chatroom_idx,
+		                index : index,
+		                chat_idx : chat_idx
+		              },
+		              priority: "high",
+		              content_available: true
+		          };
+
+		          fcm.send(message, function(err, response) {
+		            if(err) {
+		              console.log("Something has gone wrong!", err);
+		            } else {
+		              console.log("Successfully sent with response: ", response);
+		            }
+		          });//fcm.send
+		        }  
+		      }
+		    }
+			}
+		}
+    
+   
+    if (!getUsersListInGroup) {
+      return false;
+    } else {
+      return true;
+    }
+    // return flag;
+  },
 	insertNewMessage : async (...args) => {
 		let u_idx = args[0];
 		let chatroom_idx = args[1];
