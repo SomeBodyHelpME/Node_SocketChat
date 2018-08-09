@@ -60,13 +60,15 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
   	let u_idx = data.u_idx;
   	let g_idx = namespace.slice(1);
   	socket.namespace = g_idx;
-
+  	console.log("g_idx : ", g_idx);
   	let result = await chatsql.getChatroomList(u_idx, g_idx);
-
+		console.log("g_idx : ", g_idx);
+		console.log("result : ", result);
+		
   	if (!result) {
-  		socket.of(newNsp.name).emit('listresult', null);
+  		socket.emit('listresult', null);
   	} else {
-  		socket.of(newNsp.name).emit('listresult', result);
+  		socket.emit('listresult', result);
   	}
   });
 

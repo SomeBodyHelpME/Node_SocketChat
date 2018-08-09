@@ -111,6 +111,7 @@ module.exports = {
 			return false;
 		} else {
 			return {
+				"chatroom_idx" : chatroom_idx,
 				"chat_idx" : insertMessage.insertId,
 				"content" : content,
 				"write_time" : write_time,
