@@ -48,7 +48,7 @@ var chatsql = require('./module/chatsql.js');
 // \/(\d+)$
 
 // global entry point for new connections
-root_io.of(\/(\d+)$)sockets.on('connection', function (socket) {
+root_io.of(/\/(\d+)$/)sockets.on('connection', function (socket) {
   // extract namespace from connected url query param 'ns'
   // var ns = url.parse(socket.handshake.url, true).query.ns;
   const newNsp = socket.nsp;
