@@ -6,7 +6,6 @@ router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
-router.use('/list', require('./list.js'));
 router.use('/', require('./upload.js'));
 
 module.exports = router;
