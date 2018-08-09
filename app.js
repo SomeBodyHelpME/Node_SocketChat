@@ -52,10 +52,27 @@ root_io.of(\/(\d+)$)sockets.on('connection', function (socket) {
   // extract namespace from connected url query param 'ns'
   // var ns = url.parse(socket.handshake.url, true).query.ns;
   const newNsp = socket.nsp;
-  console.log('newNsp: ', newNsp);
+  console.log('Namespace : ', newNsp.name);
+  let namespace = newNsp.name;
 
+  socket.on('enterchatlist', async function (data) {
+  	var data = JSON.parse(data);
+  	let u_idx = data.u_idx;
+  	let g_idx = namespace.slice(1);
+  	socket.namespace = g_idx;
 
+  	let result await chatsql.getChatroomList(u_idx, g_idx);
 
+  	if (!result) {
+  		socket.of(newNsp.name).emit('listresult', null);
+  	} else {
+  		socket.of(newNsp.name).emit('listresult', result);
+  	}
+  });
+
+  socket.on('leavechatlist', async function () {
+  	socket.namespace = 0;
+  });
 
 	console.log('client connected');
 	// when the client emits 'adduser', this listens and executes
@@ -97,9 +114,9 @@ root_io.of(\/(\d+)$)sockets.on('connection', function (socket) {
 
 		console.log("enterroom result : ", socket.conn.server.clientsCount);
 		if (result) {
-			root_io.in(chatroom_idx).emit('enterresult', result2);
+			root_io.in(chatroom_idx).emit('roomresult', result2);
 		} else {
-			root_io.in(chatroom_idx).emit('enterresult', result);
+			root_io.in(chatroom_idx).emit('roomresult', result);
 		}
 	});
 
@@ -139,9 +156,9 @@ root_io.of(\/(\d+)$)sockets.on('connection', function (socket) {
 		let result = await chatsql.insertNewMessage(u_idx, chatroom_idx, content, count, type);
 		console.log("sendchat result : ", result);
 		if (!result) {
-			root_io.in(chatroom_idx).emit('updatechat', null);
+			root_io.of(newNsp.name).emit('updatechat', null);
 		} else {
-			root_io.in(chatroom_idx).emit('updatechat', result);
+			root_io.of(newNsp.name).emit('updatechat', result);
 		}
 	});
 

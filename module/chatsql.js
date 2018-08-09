@@ -38,6 +38,57 @@ module.exports = {
  //    console.log(createTable);
  //    return createTable;
 	// },
+	getChatroomList : async (...args) => {
+    let u_idx = args[0];
+    let g_idx = args[1];
+
+    let findUserJoinedQuery = 'SELECT chatroom_idx FROM tkb.chatroom_joined WHERE u_idx = ? AND g_idx = ?';
+    let findUserJoined = await db.queryParamCnt_Arr(findUserJoinedQuery, [u_idx, g_idx]);
+
+    if (findUserJoined && findUserJoined.length > 0) {
+      let result = [];
+      for (let i = 0 ; i < findUserJoined.length ; i++) {
+        let getChatroomCtrlNameQuery = 'SELECT ctrl_name FROM tkb.group_chatroom WHERE chatroom_idx = ?';
+        let getChatroomCtrlName = await db.queryParamCnt_Arr(getChatroomCtrlNameQuery, [findUserJoined[i].chatroom_idx]);
+
+        let getLastMessageQuery = 'SELECT * FROM chatroom.' + getChatroomCtrlName[0].ctrl_name + ' ORDER BY chat_idx DESC LIMIT 1';
+        let getLastMessage = await db.queryParamCnt_None(getLastMessageQuery);
+
+        let getEndPointQuery = 'SELECT value FROM chatroom.endpoint WHERE u_idx = ? AND chatroom_idx = ?';
+				let getEndPoint = await db.queryParamCnt_Arr(getEndPointQuery, [u_idx, findUserJoined[i].chatroom_idx]);
+
+				let unReadCount = getLastMessage[0].chat_idx - getEndPoint[0].value;
+        getLastMessage[0].chatroom_idx = findUserJoined[i].chatroom_idx;
+        getLastMessage[0].unreadcount = unReadCount;
+        result.push(getLastMessage[0]);
+      }
+
+      result.sort(function(a, b) {      // descending order
+	      return a.write_time > b.write_time ? -1 : a.write_time < b.write_time ? 1 : 0;
+	    });
+
+      return result;
+    } else {
+      return false;
+    }
+  },
+  getSingleChatroomSingleMessage : async (...args) => {
+    let u_idx = args[0];
+    let chatroom_idx = args[1];
+
+    let getChatroomCtrlNameQuery = 'SELECT ctrl_name FROM tkb.group_chatroom WHERE chatroom_idx = ?';
+    let getChatroomCtrlName = await db.queryParamCnt_Arr(getChatroomCtrlNameQuery, [findUserJoined[i].chatroom_idx]);
+
+    let getLastMessageQuery = 'SELECT * FROM chatroom.' + getChatroomCtrlName[0].ctrl_name + ' ORDER BY chat_idx DESC LIMIT 1';
+    let getLastMessage = await db.queryParamCnt_None(getLastMessageQuery);
+
+    if (getChatroomCtrlName && getLastMessage && getLastMessage.length > 0) {
+      getLastMessage[0].chatroom_idx = findUserJoined[i].chatroom_idx;
+      return getLastMessage[0];
+    } else {
+      return false;
+    }
+  },
 	insertNewMessage : async (...args) => {
 		let u_idx = args[0];
 		let chatroom_idx = args[1];
