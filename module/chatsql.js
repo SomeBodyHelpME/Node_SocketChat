@@ -45,8 +45,8 @@ module.exports = {
     let findUserJoinedQuery = 'SELECT chatroom_idx FROM tkb.chatroom_joined WHERE u_idx = ? AND g_idx = ?';
     let findUserJoined = await db.queryParamCnt_Arr(findUserJoinedQuery, [u_idx, g_idx]);
 
+    let result = [];
     if (findUserJoined && findUserJoined.length > 0) {
-      let result = [];
       for (let i = 0 ; i < findUserJoined.length ; i++) {
         let getChatroomCtrlNameQuery = 'SELECT ctrl_name FROM tkb.group_chatroom WHERE chatroom_idx = ?';
         let getChatroomCtrlName = await db.queryParamCnt_Arr(getChatroomCtrlNameQuery, [findUserJoined[i].chatroom_idx]);
