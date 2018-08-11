@@ -161,6 +161,38 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 	});
 
 	// when the client emits 'adduser', this listens and executes
+	socket.on('enterroom3', async function (data) {
+		var data = JSON.parse(data);
+		let u_idx = data.u_idx;
+		let chatroom_idx = data.chatroom_idx;
+		
+		socket.join(chatroom_idx);
+		socket.room = chatroom_idx;
+		
+		// if (!socket.userlist) {
+		// 	socket.userlist = [u_idx];
+		// } else {
+		// 	var found = socket.userlist.find(function (element) {
+		// 		return element == u_idx;
+		// 	});
+		// 	console.log("found : ", found);
+		// 	if (!found) {
+		// 		socket.userlist.push(u_idx);	
+		// 	}
+		// }
+		
+		// let result = await chatsql.enterChatroom(u_idx, chatroom_idx);
+		// let result2 = await chatsql.showAllMessage(u_idx, chatroom_idx);
+
+		// console.log("enterroom result : ", socket.conn.server.clientsCount);
+		// if (result) {
+			root_io.in(chatroom_idx).emit('enterresult3', "아무거나");
+		// } else {
+		// 	root_io.in(chatroom_idx).emit('enterresult', result);
+		// }
+	});
+
+	// when the client emits 'adduser', this listens and executes
 	socket.on('leaveroom', async function (data) {
 		var data = JSON.parse(data);
 		let u_idx = data.u_idx;
