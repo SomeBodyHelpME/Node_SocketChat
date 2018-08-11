@@ -108,7 +108,12 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 		if (!socket.userlist) {
 			socket.userlist = [u_idx];
 		} else {
-			socket.userlist.push(u_idx);
+			var found = socket.userlist.find(function (element) {
+				return element == u_idx;
+			});
+			if (!found) {
+				socket.userlist.push(u_idx);	
+			}
 		}
 		
 		let result = await chatsql.enterChatroom(u_idx, chatroom_idx);
