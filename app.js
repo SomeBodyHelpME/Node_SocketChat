@@ -154,9 +154,9 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 
 		console.log("enterroom result : ", socket.conn.server.clientsCount);
 		if (result) {
-			root_io.in(chatroom_idx).emit('roomresult2', result2);
+			root_io.in(chatroom_idx).emit('enterresult', result2);
 		} else {
-			root_io.in(chatroom_idx).emit('roomresult2', result);
+			root_io.in(chatroom_idx).emit('enterresult', result);
 		}
 	});
 
