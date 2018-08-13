@@ -45,7 +45,38 @@ var root_io = require('socket.io')(server);
 const chatsql = require('./module/chatsql.js');
 const statuscode = require('./module/statuscode.js');
 
-root_io.sockets.on('connection', async function (socket) {
+
+// \/(\d+)$
+
+// global entry point for new connections
+root_io.of(/\/(\d+)$/).on('connection', function (socket) {
+  // extract namespace from connected url query param 'ns'
+  // var ns = url.parse(socket.handshake.url, true).query.ns;
+  const newNsp = socket.nsp;
+  console.log('Namespace : ', newNsp.name);
+  let namespace = newNsp.name;
+
+  socket.on('enterchatlist', async function (data) {
+  	var data = JSON.parse(data);
+  	let u_idx = data.u_idx;
+  	let g_idx = namespace.slice(1);
+  	socket.namespace = g_idx;
+  	console.log("root_io.sockets : ", root_io.sockets);
+  	let result = await chatsql.getChatroomList(u_idx, g_idx);
+		console.log("g_idx : ", g_idx);
+		console.log("result : ", result);
+
+  	if (!result) {
+  		socket.emit('listresult', null);
+  	} else {
+  		socket.emit('listresult', result);
+  	}
+  });
+
+  socket.on('leavechatlist', async function () {
+  	socket.namespace = 0;
+  });
+
 	console.log('client connected');
 	// when the client emits 'adduser', this listens and executes
 	socket.on('adduser', async function (data) {
@@ -78,7 +109,13 @@ root_io.sockets.on('connection', async function (socket) {
 		if (!socket.userlist) {
 			socket.userlist = [u_idx];
 		} else {
-			socket.userlist.push(u_idx);
+			var found = socket.userlist.find(function (element) {
+				return element == u_idx;
+			});
+			console.log("found : ", found);
+			if (!found) {
+				socket.userlist.push(u_idx);	
+			}
 		}
 		
 		let result = await chatsql.enterChatroom(u_idx, chatroom_idx);
@@ -86,12 +123,13 @@ root_io.sockets.on('connection', async function (socket) {
 
 		console.log("enterroom result : ", socket.conn.server.clientsCount);
 		if (result) {
-			root_io.in(chatroom_idx).emit('enterresult', result2);
+			root_io.of(newNsp.name).in(chatroom_idx).emit('roomresult', result2);
 		} else {
-			root_io.in(chatroom_idx).emit('enterresult', result);
+			root_io.of(newNsp.name).in(chatroom_idx).emit('roomresult', result);
 		}
 	});
 
+	
 	// when the client emits 'adduser', this listens and executes
 	socket.on('leaveroom', async function (data) {
 		var data = JSON.parse(data);
@@ -129,20 +167,16 @@ root_io.sockets.on('connection', async function (socket) {
 
 		console.log("sendchat result : ", result);
 		if (!result) {
-			root_io.in(chatroom_idx).emit('updatechat', null);
+			root_io.of(newNsp.name).emit('updatechat', null);
 		} else {
-			let result2 = await chatsql.fcmSendWhenMakeMessage(u_idx, chatroom_idx, statuscode.uploadMessage, result.chat_idx, result.chat_idx);
-    
-			root_io.in(chatroom_idx).emit('updatechat', result);
+			root_io.of(newNsp.name).emit('updatechat', result);
 		}
 	});
-
-
-	
-
+  
 });
 
 server.listen(3030, function() {
   console.log('Socket IO server listening on port 3030 in app.js');
 });
+
 module.exports = app;

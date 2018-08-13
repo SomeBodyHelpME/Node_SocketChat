@@ -38,62 +38,56 @@ module.exports = {
  //    console.log(createTable);
  //    return createTable;
 	// },
-  fcmSendWhenMakeMessage : async (...args) => {
+	getChatroomList : async (...args) => {
+    let u_idx = args[0];
+    let g_idx = args[1];
+
+    let findUserJoinedQuery = 'SELECT chatroom_idx FROM tkb.chatroom_joined WHERE u_idx = ? AND g_idx = ?';
+    let findUserJoined = await db.queryParamCnt_Arr(findUserJoinedQuery, [u_idx, g_idx]);
+
+    let result = [];
+    if (findUserJoined && findUserJoined.length > 0) {
+      for (let i = 0 ; i < findUserJoined.length ; i++) {
+        let getChatroomCtrlNameQuery = 'SELECT ctrl_name FROM tkb.group_chatroom WHERE chatroom_idx = ?';
+        let getChatroomCtrlName = await db.queryParamCnt_Arr(getChatroomCtrlNameQuery, [findUserJoined[i].chatroom_idx]);
+
+        let getLastMessageQuery = 'SELECT * FROM chatroom.' + getChatroomCtrlName[0].ctrl_name + ' ORDER BY chat_idx DESC LIMIT 1';
+        let getLastMessage = await db.queryParamCnt_None(getLastMessageQuery);
+
+        let getEndPointQuery = 'SELECT value FROM chatroom.endpoint WHERE u_idx = ? AND chatroom_idx = ?';
+				let getEndPoint = await db.queryParamCnt_Arr(getEndPointQuery, [u_idx, findUserJoined[i].chatroom_idx]);
+
+				let unReadCount = getLastMessage[0].chat_idx - getEndPoint[0].value;
+        getLastMessage[0].chatroom_idx = findUserJoined[i].chatroom_idx;
+        getLastMessage[0].unreadcount = unReadCount;
+        result.push(getLastMessage[0]);
+      }
+
+      result.sort(function(a, b) {      // descending order
+	      return a.write_time > b.write_time ? -1 : a.write_time < b.write_time ? 1 : 0;
+	    });
+
+      return result;
+    } else {
+      return false;
+    }
+  },
+  getSingleChatroomSingleMessage : async (...args) => {
     let u_idx = args[0];
     let chatroom_idx = args[1];
-    let status = args[2];
-    let index = args[3];
-    let chat_idx = args[4];
-    var flag = true;
-		
-		let getAllChatroomIndexQuery = 'SELECT chatroom_idx FROM tkb.chatroom_joined WHERE u_idx = ?';
-		let getAllChatroomIndex = await db.queryParamCnt_Arr(getAllChatroomIndexQuery, [u_idx]);
 
-		if (getAllChatroomIndex) {
-			for (let i = 0 ; i < getAllChatroomIndex.length ; i++) {
-				let getUsersListInGroupQuery = 'SELECT u_idx FROM tkb.chatroom_joined WHERE chatroom_idx = ? AND u_idx != ?';
-		    var getUsersListInGroup = await db.queryParamCnt_Arr(getUsersListInGroupQuery, [chatroom_idx, u_idx]);
+    let getChatroomCtrlNameQuery = 'SELECT ctrl_name FROM tkb.group_chatroom WHERE chatroom_idx = ?';
+    let getChatroomCtrlName = await db.queryParamCnt_Arr(getChatroomCtrlNameQuery, [findUserJoined[i].chatroom_idx]);
 
-		    if (getUsersListInGroup) {
-		      for (let i = 0 ; i < getUsersListInGroup.length ; i++) {
-		        let getUsersTokenQuery = 'SELECT token FROM tkb.user WHERE u_idx = ?';
-		        var getUsersToken = await db.queryParamCnt_Arr(getUsersTokenQuery, [getUsersListInGroup[i].u_idx]);
-		        
-		        if (getUsersToken) {
-		          let client_token = getUsersToken[0].token;
+    let getLastMessageQuery = 'SELECT * FROM chatroom.' + getChatroomCtrlName[0].ctrl_name + ' ORDER BY chat_idx DESC LIMIT 1';
+    let getLastMessage = await db.queryParamCnt_None(getLastMessageQuery);
 
-		          var message = { //this may vary according to the message type (single recipient, multicast, topic, et cetera)
-		              to: client_token,
-		              data: {
-		                status : status,
-		                chatroom_idx : chatroom_idx,
-		                index : index,
-		                chat_idx : chat_idx
-		              },
-		              priority: "high",
-		              content_available: true
-		          };
-
-		          fcm.send(message, function(err, response) {
-		            if(err) {
-		              console.log("Something has gone wrong!", err);
-		            } else {
-		              console.log("Successfully sent with response: ", response);
-		            }
-		          });//fcm.send
-		        }  
-		      }
-		    }
-			}
-		}
-    
-   
-    if (!getUsersListInGroup) {
-      return false;
+    if (getChatroomCtrlName && getLastMessage && getLastMessage.length > 0) {
+      getLastMessage[0].chatroom_idx = findUserJoined[i].chatroom_idx;
+      return getLastMessage[0];
     } else {
-      return true;
+      return false;
     }
-    // return flag;
   },
 	insertNewMessage : async (...args) => {
 		let u_idx = args[0];
@@ -117,6 +111,7 @@ module.exports = {
 			return false;
 		} else {
 			return {
+				"chatroom_idx" : chatroom_idx,
 				"chat_idx" : insertMessage.insertId,
 				"content" : content,
 				"write_time" : write_time,
@@ -206,10 +201,10 @@ module.exports = {
 
 		let getChatroomCtrlNameQuery = 'SELECT ctrl_name FROM tkb.group_chatroom WHERE chatroom_idx = ?';
 		let getChatroomCtrlName = await db.queryParamCnt_Arr(getChatroomCtrlNameQuery, [chatroom_idx]);
-
+		console.log("getChatroomCtrlName : ", getChatroomCtrlName);
 		let getAllMessageQuery = 'SELECT * FROM chatroom.' + getChatroomCtrlName[0].ctrl_name + ' ORDER BY chat_idx ASC';
 		let getAllMessage = await db.queryParamCnt_None(getAllMessageQuery);
-
+		
 		if (!getChatroomCtrlName || !getAllMessage) {
 			return false;
 		} else {
