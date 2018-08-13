@@ -122,9 +122,9 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 
 		console.log("enterroom result : ", socket.conn.server.clientsCount);
 		if (result) {
-			root_io.in(chatroom_idx).emit('roomresult', result2);
+			root_io.of(newNsp.name).in(chatroom_idx).emit('roomresult', result2);
 		} else {
-			root_io.in(chatroom_idx).emit('roomresult', result);
+			root_io.of(newNsp.name).in(chatroom_idx).emit('roomresult', result);
 		}
 	});
 
