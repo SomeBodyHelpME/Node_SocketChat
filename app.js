@@ -67,9 +67,9 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 		console.log("result : ", result);
 
   	if (!result) {
-  		socket.emit('listresult', null);
+  		root_io.of(newNsp.name).in(chatroom_idx).emit('listresult', null);
   	} else {
-  		socket.emit('listresult', result);
+  		root_io.of(newNsp.name).in(chatroom_idx).emit('listresult', result);
   	}
   });
 
