@@ -75,6 +75,25 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 
   socket.on('leavechatlist', async function () {
   	socket.namespace = 0;
+  	socket.disconnect();
+  });
+
+  socket.on('leavechatlisttrue', async function () {
+  	socket.namespace = 0;
+  	console.log("leavechatlisttrue");
+  	console.log("before root_io.sockets : ", root_io.sockets);
+  	socket.disconnect(true);
+  	console.log("after root_io.sockets : ", root_io.sockets);
+  	socket.emit('leavechatlisttrueresult', 'leavechatlisttrueresult');
+  });
+
+  socket.on('leavechatlistfalse', async function () {
+  	socket.namespace = 0;
+  	console.log("leavechatlistfalse");
+  	console.log("before root_io.sockets : ", root_io.sockets);
+  	socket.disconnect(false);
+  	console.log("after root_io.sockets : ", root_io.sockets);
+  	socket.emit('leavechatlistfalseresult', 'leavechatlistfalseresult');
   });
 
 	console.log('client connected');
