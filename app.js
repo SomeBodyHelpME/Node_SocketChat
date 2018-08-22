@@ -180,10 +180,10 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 		let type = data.type;
 		
 		console.log("count : ", count);
-		console.log("sendchat data : ", data);
+		// console.log("sendchat data : ", data);
 		
 		let result = await chatsql.insertNewMessage(u_idx, chatroom_idx, content, count, type);
-
+		console.log("unreadcount : ", result.count);
 		console.log("sendchat result : ", result);
 		if (!result) {
 			root_io.of(newNsp.name).emit('updatechat', null);
