@@ -192,10 +192,10 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 		console.log("sendchat result : ", result);
 		if (!result) {
 			root_io.of(newNsp.name).in(chatroom_idx).emit('updatechat', null);
-			socket.broadcast.of(newNsp.name).emit('updatechatlist', null);
+			socket.broadcast.emit('updatechatlist', null);
 		} else {
 			root_io.of(newNsp.name).in(chatroom_idx).emit('updatechat', result);
-			socket.broadcast.of(newNsp.name).emit('updatechatlist', result);
+			socket.broadcast.emit('updatechatlist', result);
 		}
 	});
   
