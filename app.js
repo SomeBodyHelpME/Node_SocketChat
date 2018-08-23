@@ -62,7 +62,7 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
   	let u_idx = data.u_idx;
   	let g_idx = namespace.slice(1);
   	socket.namespace = g_idx;
-  	console.log("root_io.sockets : ", root_io.sockets);
+  	// console.log("root_io.sockets : ", root_io.sockets);
   	let result = await chatsql.getChatroomList(u_idx, g_idx);
 		console.log("g_idx : ", g_idx);
 		console.log("result : ", result);
