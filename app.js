@@ -123,7 +123,9 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 		let u_idx = data.u_idx;
 		let chatroom_idx = data.chatroom_idx;
 		console.log("before enter socket.conn.server.clientsCount : ", socket.conn.server.clientsCount);
+		console.log("before userlist : ", socket.userlist);
 		socket.join(chatroom_idx);
+		console.log("after userlist : ", socket.userlist);
 		console.log("after enter socket.conn.server.clientsCount : ", socket.conn.server.clientsCount);
 		socket.room = chatroom_idx;
 		
