@@ -57,7 +57,7 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
   let namespace = newNsp.name;
 
   socket.on('enterchatlist', async function (data) {
-  	console.log("socket.conn.server.clientsCount : ", socket.conn.server.clientsCount);
+  	// console.log("socket.conn.server.clientsCount : ", socket.conn.server.clientsCount);
   	var data = JSON.parse(data);
   	let u_idx = data.u_idx;
   	let g_idx = namespace.slice(1);
@@ -122,11 +122,11 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 		var data = JSON.parse(data);
 		let u_idx = data.u_idx;
 		let chatroom_idx = data.chatroom_idx;
-		console.log("before enter socket.conn.server.clientsCount : ", socket.conn.server.clientsCount);
+		// console.log("before enter socket.conn.server.clientsCount : ", socket.conn.server.clientsCount);
 		console.log("before userlist : ", socket.userlist);
 		socket.join(chatroom_idx);
-		console.log("after userlist : ", socket.userlist);
-		console.log("after enter socket.conn.server.clientsCount : ", socket.conn.server.clientsCount);
+		
+		// console.log("after enter socket.conn.server.clientsCount : ", socket.conn.server.clientsCount);
 		socket.room = chatroom_idx;
 		
 		if (!socket.userlist) {
@@ -140,7 +140,7 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 				socket.userlist.push(u_idx);	
 			}
 		}
-		
+		console.log("after userlist : ", socket.userlist);
 		let result = await chatsql.enterChatroom(u_idx, chatroom_idx);
 		let result2 = await chatsql.showAllMessage(u_idx, chatroom_idx);
 
@@ -164,9 +164,9 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 		console.log("leaveroom result : ", result);
 
 		socket.emit('leaveresult', result);
-		console.log("before leave socket.conn.server.clientsCount : ", socket.conn.server.clientsCount);
+		// console.log("before leave socket.conn.server.clientsCount : ", socket.conn.server.clientsCount);
 		socket.leave(socket.room);
-		console.log("after leave socket.conn.server.clientsCount : ", socket.conn.server.clientsCount);
+		// console.log("after leave socket.conn.server.clientsCount : ", socket.conn.server.clientsCount);
 		console.log("before userlist splice : ", socket.userlist);
 		const idx = socket.userlist.indexOf(u_idx);
 		if (idx > -1)
