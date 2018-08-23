@@ -125,7 +125,7 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 		// console.log("before enter socket.conn.server.clientsCount : ", socket.conn.server.clientsCount);
 		console.log("before userlist : ", socket.userlist);
 		socket.join(chatroom_idx);
-
+		
 		// console.log("after enter socket.conn.server.clientsCount : ", socket.conn.server.clientsCount);
 		socket.room = chatroom_idx;
 		
@@ -192,10 +192,10 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 		console.log("sendchat result : ", result);
 		if (!result) {
 			root_io.of(newNsp.name).in(chatroom_idx).emit('updatechat', null);
-			socket.broadcast.emit('updatechatlist', null);
+			root_io.of(newNsp.name).emit('updatechatlist', null);
 		} else {
 			root_io.of(newNsp.name).in(chatroom_idx).emit('updatechat', result);
-			socket.broadcast.emit('updatechatlist', result);
+			root_io.of(newNsp.name).emit('updatechatlist', result);
 		}
 	});
   
