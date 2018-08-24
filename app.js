@@ -144,8 +144,10 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 		let result = await chatsql.enterChatroom(u_idx, chatroom_idx);
 		let result2 = await chatsql.showAllMessage(u_idx, chatroom_idx);
 		// console.log("root_io.sockets.clients : ", root_io.sockets.clients(chatroom_idx));
-		console.log("root_io.sockets : ", root_io.sockets);
-		console.log("root_io.of(nsp).in(room).clients : ", root_io.of(newNsp.name).in(chatroom_idx).clients);
+		root_io.of(newNsp.name).in(chatroom_idx).clients(function(err, clients) {
+			var numClients = clients.length;
+			console.log("numClients : ", numClients);
+		})
 		console.log("enterroom result : ", socket.conn.server.clientsCount);
 		if (result) {
 			root_io.of(newNsp.name).in(chatroom_idx).emit('roomresult', result2);
