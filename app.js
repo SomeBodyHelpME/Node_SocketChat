@@ -126,7 +126,7 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 		let existflag = false;	// 챗룸에 들어와있는지 테스트하는 flag / true 가 for문내에서 찾았을 때, false는 for문내에 없을 때 
 		socket.join(chatroom_idx);
 		socket.room = chatroom_idx;
-		
+		console.log('before enter dev2 : ', root_io.userlist);
 		if (!root_io.userlist) {		// array 생성 전
 			root_io.userlist = [{"room_id" : chatroom_idx, "members" : [u_idx]}];
 		} else {
@@ -151,6 +151,7 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 				root_io.userlist.push({"room_id" : chatroom_idx, "members" : [u_idx]});
 			}
 		}
+		console.log('after enter dev2 : ', root_io.userlist);
 		
 		if (exitflag) {
 			var result = await chatsql.enterChatroom(u_idx, chatroom_idx);	
@@ -181,15 +182,15 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 
 		for (let i = 0 ; i < root_io.userlist.length ; i++) {
 			if (root_io.userlist[i].room_id === chatroom_idx) {
-				console.log("before i userlist splice : ", root_io.userlist[i]);
+				console.log("before dev2 i userlist splice : ", root_io.userlist[i]);
 				const idx = root_io.userlist[i].members.indexOf(u_idx);
 				if (idx > -1)
 					root_io.userlist[i].members.splice(idx, 1);
-				console.log("after i userlist splice : ", root_io.userlist[i]);
+				console.log("after dev2 i userlist splice : ", root_io.userlist[i]);
 
 				if (root_io.userlist[i].members.length === 0) {		// splice index 가 0 일 경우
 					root_io.userlist.splice(i, 1);
-					console.log("after userlist splice : ", root_io.userlist);
+					console.log("after dev2 userlist splice : ", root_io.userlist);
 				}
 			}
 		}
