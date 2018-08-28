@@ -206,6 +206,21 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 		});
 		
 	});
+
+	socket.on('paging', async function(data) {
+		var data = JSON.parse(data);
+		let u_idx = data.u_idx;
+		let chatroom_idx = data.chatroom_idx;
+		let paging_idx = data.paging_idx;
+
+		let result = await chatsql.pagingMessage(u_idx, chatroom_idx, paging_idx);
+
+		if (!result) {
+			socket.emit('pagingresult', null);
+		} else {
+			socket.emit('pagingresult', result);
+		}
+	});
   
 });
 

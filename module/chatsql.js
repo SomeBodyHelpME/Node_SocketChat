@@ -214,12 +214,14 @@ module.exports = {
 	pagingMessage : async (...args) => {
 		let u_idx = args[0];
 		let chatroom_idx = args[1];
-		let page = args[2];
+		let paging_idx = args[2];
+
+		const rowcount = 50;
 
 		let getChatroomCtrlNameQuery = 'SELECT ctrl_name FROM tkb.group_chatroom WHERE chatroom_idx = ?';
 		let getChatroomCtrlName = await db.queryParamCnt_Arr(getChatroomCtrlNameQuery, [chatroom_idx]);
 
-		let getPageMessageQuery = 'SELECT * FROM chatroom.' + getChatroomCtrlName[0].ctrl_name + ' ORDER BY chat_idx DESC LIMIT ';		// 수정 필요 조금 더 생각을 해보자
+		let getPageMessageQuery = 'SELECT * FROM chatroom.' + getChatroomCtrlName[0].ctrl_name + ' ORDER BY chat_idx DESC LIMIT ' + rowcount * paging_idx + ', ' + rowcount;		// 수정 필요 조금 더 생각을 해보자
 		let getPageMessage = await db.queryParamCnt_None(getAllMessageQuery);
 		
 		if (!getChatroomCtrlName || !getPageMessage) {
