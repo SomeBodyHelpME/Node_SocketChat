@@ -122,22 +122,28 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 		let u_idx = data.u_idx;
 		let chatroom_idx = data.chatroom_idx;
 		
+		let exitflag = true;		// 정상종료 flag / true 가 정상종료, false 가 강제 종료
 		socket.join(chatroom_idx);
 		socket.room = chatroom_idx;
 		
-		if (!socket.userlist) {
-			socket.userlist = [u_idx];
+		if (!root_io.of(newNsp.name).in(chatroom_idx).userlist) {
+			root_io.of(newNsp.name).in(chatroom_idx).userlist = [u_idx];
 		} else {
-			var found = socket.userlist.find(function (element) {
+			var found = root_io.of(newNsp.name).in(chatroom_idx).userlist.find(function (element) {
 				return element == u_idx;
 			});
 			console.log("found : ", found);
 			if (!found) {
-				socket.userlist.push(u_idx);	
+				exitflag = true;
+				root_io.of(newNsp.name).in(chatroom_idx).userlist.push(u_idx);	
+			} else {
+				exitflag = false;
 			}
 		}
 		
-		let result = await chatsql.enterChatroom(u_idx, chatroom_idx);
+		if (exitflag) {
+			var result = await chatsql.enterChatroom(u_idx, chatroom_idx);	
+		}
 		let result2 = await chatsql.showAllMessage(u_idx, chatroom_idx);
 
 		console.log("enterroom result : ", socket.conn.server.clientsCount);
@@ -162,11 +168,11 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 		socket.emit('leaveresult', result);
 
 		socket.leave(socket.room);
-		console.log("before userlist splice : ", socket.userlist);
-		const idx = socket.userlist.indexOf(u_idx);
+		console.log("before userlist splice : ", root_io.of(newNsp.name).in(chatroom_idx).userlist);
+		const idx = root_io.of(newNsp.name).in(chatroom_idx).userlist.indexOf(u_idx);
 		if (idx > -1)
-			socket.userlist.splice(idx, 1);
-		console.log("after userlist splice : ", socket.userlist);
+			root_io.of(newNsp.name).in(chatroom_idx).userlist.splice(idx, 1);
+		console.log("after userlist splice : ", root_io.of(newNsp.name).in(chatroom_idx).userlist);
 
 	});
 
