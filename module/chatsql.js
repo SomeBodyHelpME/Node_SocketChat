@@ -134,10 +134,10 @@ module.exports = {
 		if (!getChatroomCtrlName || !getEndPoint || getEndPoint.length === 0) {
 			return false;
 		} else {
-			let updateChatroomCountQuery = 'UPDATE chatroom.' + getChatroomCtrlName[0].ctrl_name + ' SET count = count - 1 WHERE chat_idx > ? AND type = ?';
+			let updateChatroomCountQuery = 'UPDATE chatroom.' + getChatroomCtrlName[0].ctrl_name + ' SET count = count - 1 WHERE chat_idx > ? AND type = ? AND count > 0';
 			let updateChatroomCount = await db.queryParamCnt_Arr(updateChatroomCountQuery, [getEndPoint[0].value, 0]);
 
-			return true;
+			return getEndPoint[0].value;
 		}
 	},
 	leaveChatroom : async (...args) => {
