@@ -122,8 +122,8 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 		let u_idx = data.u_idx;
 		let chatroom_idx = data.chatroom_idx;
 		
-		let exitflag = true;
-		let existflag = false;
+		let exitflag = true;		// 정상종료 flag / true 가 정상종료, false 가 강제 종료
+		let existflag = false;	// 챗룸에 들어와있는지 테스트하는 flag / true 가 for문내에서 찾았을 때, false는 for문내에 없을 때 
 		socket.join(chatroom_idx);
 		socket.room = chatroom_idx;
 		
@@ -151,17 +151,7 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 				root_io.userlist.push({room_id : chatroom_idx, members : [u_idx]});
 			}
 		}
-		// if (!socket.userlist) {
-		// 	socket.userlist = [u_idx];
-		// } else {
-		// 	var found = socket.userlist.find(function (element) {
-		// 		return element == u_idx;
-		// 	});
-		// 	console.log("found : ", found);
-		// 	if (!found) {
-		// 		socket.userlist.push(u_idx);	
-		// 	}
-		// }
+		
 		if (exitflag) {
 			var result = await chatsql.enterChatroom(u_idx, chatroom_idx);	
 		}
@@ -189,11 +179,21 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 		socket.emit('leaveresult', result);
 
 		socket.leave(socket.room);
-		console.log("before userlist splice : ", socket.userlist);
-		const idx = socket.userlist.indexOf(u_idx);
-		if (idx > -1)
-			socket.userlist.splice(idx, 1);
-		console.log("after userlist splice : ", socket.userlist);
+
+		for (let i = 0 ; i < root_io.userlist.length ; i++) {
+			if (root_io.userlist[i].room_id === chatroom_idx) {
+				console.log("before i userlist splice : ", root_io.userlist[i]);
+				const idx = root_io.userlist[i].members.indexOf(u_idx);
+				if (idx > -1)
+					root_io.userlist[i].members.splice(idx, 1);
+				console.log("after i userlist splice : ", root_io.userlist[i]);
+
+				if (root_io.userlist.[i].members.length === 0) {		// splice index 가 0 일 경우
+					root_io.userlist.splice(i, 1);
+					console.log("after userlist splice : ", root_io.userlist);
+				}
+			}
+		}
 
 	});
 
