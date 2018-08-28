@@ -126,6 +126,7 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 		socket.join(chatroom_idx);
 		socket.room = chatroom_idx;
 		
+		console.log('before enter dev3 : ', root_io.of(newNsp.name).in(chatroom_idx).userlist);
 		if (!root_io.of(newNsp.name).in(chatroom_idx).userlist) {
 			root_io.of(newNsp.name).in(chatroom_idx).userlist = [u_idx];
 		} else {
@@ -140,7 +141,7 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 				exitflag = false;
 			}
 		}
-		
+		console.log('after enter dev3 : ', root_io.of(newNsp.name).in(chatroom_idx).userlist);
 		if (exitflag) {
 			var result = await chatsql.enterChatroom(u_idx, chatroom_idx);	
 		}
@@ -168,11 +169,11 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 		socket.emit('leaveresult', result);
 
 		socket.leave(socket.room);
-		console.log("before userlist splice : ", root_io.of(newNsp.name).in(chatroom_idx).userlist);
+		console.log("before dev3 userlist splice : ", root_io.of(newNsp.name).in(chatroom_idx).userlist);
 		const idx = root_io.of(newNsp.name).in(chatroom_idx).userlist.indexOf(u_idx);
 		if (idx > -1)
 			root_io.of(newNsp.name).in(chatroom_idx).userlist.splice(idx, 1);
-		console.log("after userlist splice : ", root_io.of(newNsp.name).in(chatroom_idx).userlist);
+		console.log("after dev3 userlist splice : ", root_io.of(newNsp.name).in(chatroom_idx).userlist);
 
 	});
 
