@@ -128,17 +128,17 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 		socket.room = chatroom_idx;
 		
 		if (!root_io.userlist) {		// array 생성 전
-			root_io.userlist = [{room_id : chatroom_idx, members : [u_idx]}];
+			root_io.userlist = [{"room_id" : chatroom_idx, "members" : [u_idx]}];
 		} else {
 			for (let i = 0 ; i < root_io.userlist.length ; i++) {
 				if (root_io.userlist[i].room_id === chatroom_idx) {		// 이미 한 사람이 들어와 있을 때
-					var found = root_io.userlist.members.find(function (element) {
+					var found = root_io.userlist[i].members.find(function (element) {
 						return element === u_idx;
 					});
 					console.log("found : ", found);
 					if (!found) {
 						exitflag = true;
-						root_io.userlist.members.push(u_idx);	// 정상종료
+						root_io.userlist[i].members.push(u_idx);	// 정상종료
 					} else {
 						exitflag = false;													// 강제종료
 					}
@@ -148,7 +148,7 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 			}
 
 			if (!existflag) {		// 내가 그 방에 처음 들어갈 때
-				root_io.userlist.push({room_id : chatroom_idx, members : [u_idx]});
+				root_io.userlist.push({"room_id" : chatroom_idx, "members" : [u_idx]});
 			}
 		}
 		
@@ -157,7 +157,6 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 		}
 		let result2 = await chatsql.showAllMessage(u_idx, chatroom_idx);
 
-		console.log("enterroom result : ", socket.conn.server.clientsCount);
 		if (result) {
 			root_io.of(newNsp.name).in(chatroom_idx).emit('roomresult', result2);
 		} else {
@@ -188,7 +187,7 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 					root_io.userlist[i].members.splice(idx, 1);
 				console.log("after i userlist splice : ", root_io.userlist[i]);
 
-				if (root_io.userlist.[i].members.length === 0) {		// splice index 가 0 일 경우
+				if (root_io.userlist[i].members.length === 0) {		// splice index 가 0 일 경우
 					root_io.userlist.splice(i, 1);
 					console.log("after userlist splice : ", root_io.userlist);
 				}
