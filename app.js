@@ -57,11 +57,12 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
   let namespace = newNsp.name;
 
   socket.on('enterchatlist', async function (data) {
+  	// console.log("socket.conn.server.clientsCount : ", socket.conn.server.clientsCount);
   	var data = JSON.parse(data);
   	let u_idx = data.u_idx;
   	let g_idx = namespace.slice(1);
   	socket.namespace = g_idx;
-  	console.log("root_io.sockets : ", root_io.sockets);
+  	// console.log("root_io.sockets : ", root_io.sockets);
   	let result = await chatsql.getChatroomList(u_idx, g_idx);
 		console.log("g_idx : ", g_idx);
 		console.log("result : ", result);
@@ -121,8 +122,11 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 		var data = JSON.parse(data);
 		let u_idx = data.u_idx;
 		let chatroom_idx = data.chatroom_idx;
-		
+		// console.log("before enter socket.conn.server.clientsCount : ", socket.conn.server.clientsCount);
+		console.log("before userlist : ", socket.userlist);
 		socket.join(chatroom_idx);
+
+		// console.log("after enter socket.conn.server.clientsCount : ", socket.conn.server.clientsCount);
 		socket.room = chatroom_idx;
 		
 		if (!socket.userlist) {
@@ -136,10 +140,14 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 				socket.userlist.push(u_idx);	
 			}
 		}
-		
+		console.log("after userlist : ", socket.userlist);
 		let result = await chatsql.enterChatroom(u_idx, chatroom_idx);
 		let result2 = await chatsql.showAllMessage(u_idx, chatroom_idx);
-
+		// console.log("root_io.sockets.clients : ", root_io.sockets.clients(chatroom_idx));
+		root_io.of(newNsp.name).in(chatroom_idx).clients(function(err, clients) {
+			var numClients = clients.length;
+			console.log("numClients : ", numClients);
+		})
 		console.log("enterroom result : ", socket.conn.server.clientsCount);
 		if (result) {
 			root_io.of(newNsp.name).in(chatroom_idx).emit('roomresult', result2);
@@ -160,8 +168,9 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 		console.log("leaveroom result : ", result);
 
 		socket.emit('leaveresult', result);
-
+		// console.log("before leave socket.conn.server.clientsCount : ", socket.conn.server.clientsCount);
 		socket.leave(socket.room);
+		// console.log("after leave socket.conn.server.clientsCount : ", socket.conn.server.clientsCount);
 		console.log("before userlist splice : ", socket.userlist);
 		const idx = socket.userlist.indexOf(u_idx);
 		if (idx > -1)
@@ -176,21 +185,40 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 		let u_idx = data.u_idx;
 		let chatroom_idx = data.chatroom_idx;
 		let content = data.content;
-		let count = socket.conn.server.clientsCount;
 		let type = data.type;
+		root_io.of(newNsp.name).in(chatroom_idx).clients(async function(err, clients) {
+			var count = clients.length;
+			
+			
+			console.log("count : ", count);
+			// console.log("sendchat data : ", data);
+			
+			let result = await chatsql.insertNewMessage(u_idx, chatroom_idx, content, count, type);
+			console.log("unreadcount : ", result.count);
+			console.log("sendchat result : ", result);
+			if (!result) {
+				root_io.of(newNsp.name).in(chatroom_idx).emit('updatechat', null);
+				root_io.of(newNsp.name).emit('updatechatlist', null);
+			} else {
+				root_io.of(newNsp.name).in(chatroom_idx).emit('updatechat', result);
+				root_io.of(newNsp.name).emit('updatechatlist', result);
+			}
+		});
 		
-		console.log("count : ", count);
-		// console.log("sendchat data : ", data);
-		
-		let result = await chatsql.insertNewMessage(u_idx, chatroom_idx, content, count, type);
-		console.log("unreadcount : ", result.count);
-		console.log("sendchat result : ", result);
+	});
+
+	socket.on('paging', async function(data) {
+		var data = JSON.parse(data);
+		let u_idx = data.u_idx;
+		let chatroom_idx = data.chatroom_idx;
+		let paging_idx = data.paging_idx;
+
+		let result = await chatsql.pagingMessage(u_idx, chatroom_idx, paging_idx);
+
 		if (!result) {
-			root_io.of(newNsp.name).in(chatroom_idx).emit('updatechat', null);
-			root_io.of(newNsp.name).emit('updatechatlist', null);
+			socket.emit('pagingresult', null);
 		} else {
-			root_io.of(newNsp.name).in(chatroom_idx).emit('updatechat', result);
-			root_io.of(newNsp.name).emit('updatechatlist', result);
+			socket.emit('pagingresult', result);
 		}
 	});
   
