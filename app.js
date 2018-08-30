@@ -148,11 +148,9 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 		let result2 = await chatsql.showAllMessage(u_idx, chatroom_idx);
 
 		console.log("enterroom result : ", socket.conn.server.clientsCount);
-		if (result) {
-			root_io.of(newNsp.name).in(chatroom_idx).emit('roomresult', result2);
-		} else {
-			root_io.of(newNsp.name).in(chatroom_idx).emit('roomresult', result);
-		}
+		
+		root_io.of(newNsp.name).in(chatroom_idx).emit('roomresult', result2);
+		
 	});
 
 	
