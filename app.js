@@ -154,15 +154,11 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 		console.log('after enter dev2 : ', root_io.userlist);
 		
 		if (exitflag) {
-			var result = await chatsql.enterChatroom(u_idx, chatroom_idx);	
+			var result = await chatsql.enterChatroom(u_idx, chatroom_idx);
 		}
 		let result2 = await chatsql.showAllMessage(u_idx, chatroom_idx);
 
-		if (result) {
-			root_io.of(newNsp.name).in(chatroom_idx).emit('roomresult', result2);
-		} else {
-			root_io.of(newNsp.name).in(chatroom_idx).emit('roomresult', result);
-		}
+		root_io.of(newNsp.name).in(chatroom_idx).emit('roomresult', result2);
 	});
 
 	
