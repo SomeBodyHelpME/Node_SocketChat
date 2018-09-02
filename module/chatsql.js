@@ -57,10 +57,14 @@ module.exports = {
         let getEndPointQuery = 'SELECT value FROM chatroom.endpoint WHERE u_idx = ? AND chatroom_idx = ?';
 				let getEndPoint = await db.queryParamCnt_Arr(getEndPointQuery, [u_idx, findUserJoined[i].chatroom_idx]);
 
-				let unReadCount = getLastMessage[0].chat_idx - getEndPoint[0].value;
-        getLastMessage[0].chatroom_idx = findUserJoined[i].chatroom_idx;
-        getLastMessage[0].unreadcount = unReadCount;
-        result.push(getLastMessage[0]);
+				if (!getLastMessage) {
+					console.log('getChatroomCtrlName[0].ctrl_name : ', getChatroomCtrlName[0].ctrl_name);
+				} else {
+					let unReadCount = getLastMessage[0].chat_idx - getEndPoint[0].value;
+	        getLastMessage[0].chatroom_idx = findUserJoined[i].chatroom_idx;
+	        getLastMessage[0].unreadcount = unReadCount;
+	        result.push(getLastMessage[0]);
+				}
       }
 
       result.sort(function(a, b) {      // descending order
@@ -201,7 +205,7 @@ module.exports = {
 
 		let getChatroomCtrlNameQuery = 'SELECT ctrl_name FROM tkb.group_chatroom WHERE chatroom_idx = ?';
 		let getChatroomCtrlName = await db.queryParamCnt_Arr(getChatroomCtrlNameQuery, [chatroom_idx]);
-		console.log("getChatroomCtrlName : ", getChatroomCtrlName);
+		// console.log("getChatroomCtrlName : ", getChatroomCtrlName);
 		let getAllMessageQuery = 'SELECT * FROM chatroom.' + getChatroomCtrlName[0].ctrl_name + ' ORDER BY chat_idx ASC';
 		let getAllMessage = await db.queryParamCnt_None(getAllMessageQuery);
 		
