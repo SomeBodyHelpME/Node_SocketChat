@@ -210,6 +210,9 @@ module.exports = {
 		let getAllMessage = await db.queryParamCnt_None(getAllMessageQuery);
 		
 		if (!getChatroomCtrlName || !getAllMessage) {
+			console.log('Enterroom False!!');
+			console.log('getChatroomCtrlName : ', getChatroomCtrlName);
+			console.log('getAllMessage : ', getAllMessage);
 			return false;
 		} else {
 			return getAllMessage;
