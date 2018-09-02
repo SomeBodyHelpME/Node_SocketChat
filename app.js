@@ -122,38 +122,34 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 		var data = JSON.parse(data);
 		let u_idx = data.u_idx;
 		let chatroom_idx = data.chatroom_idx;
-		// console.log("before enter socket.conn.server.clientsCount : ", socket.conn.server.clientsCount);
-		console.log("before userlist : ", socket.userlist);
+		
+		let exitflag = true;		// 정상종료 flag / true 가 정상종료, false 가 강제 종료
 		socket.join(chatroom_idx);
-
-		// console.log("after enter socket.conn.server.clientsCount : ", socket.conn.server.clientsCount);
 		socket.room = chatroom_idx;
 		
-		if (!socket.userlist) {
-			socket.userlist = [u_idx];
+		console.log('before enter dev3 : ', root_io.of(newNsp.name).in(chatroom_idx).userlist);
+		if (!root_io.of(newNsp.name).in(chatroom_idx).userlist) {
+			root_io.of(newNsp.name).in(chatroom_idx).userlist = [u_idx];
 		} else {
-			var found = socket.userlist.find(function (element) {
+			var found = root_io.of(newNsp.name).in(chatroom_idx).userlist.find(function (element) {
 				return element == u_idx;
 			});
 			console.log("found : ", found);
 			if (!found) {
-				socket.userlist.push(u_idx);	
+				exitflag = true;
+				root_io.of(newNsp.name).in(chatroom_idx).userlist.push(u_idx);	
+			} else {
+				exitflag = false;
 			}
 		}
-		console.log("after userlist : ", socket.userlist);
-		let result = await chatsql.enterChatroom(u_idx, chatroom_idx);
-		let result2 = await chatsql.showAllMessage(u_idx, chatroom_idx);
-		// console.log("root_io.sockets.clients : ", root_io.sockets.clients(chatroom_idx));
-		root_io.of(newNsp.name).in(chatroom_idx).clients(function(err, clients) {
-			var numClients = clients.length;
-			console.log("numClients : ", numClients);
-		})
-		console.log("enterroom result : ", socket.conn.server.clientsCount);
-		if (result) {
-			root_io.of(newNsp.name).in(chatroom_idx).emit('roomresult', result2);
-		} else {
-			root_io.of(newNsp.name).in(chatroom_idx).emit('roomresult', result);
+		console.log('after enter dev3 : ', root_io.of(newNsp.name).in(chatroom_idx).userlist);
+		if (exitflag) {
+			var result = await chatsql.enterChatroom(u_idx, chatroom_idx);	
 		}
+		let result2 = await chatsql.showAllMessage(u_idx, chatroom_idx);
+		
+		root_io.of(newNsp.name).in(chatroom_idx).emit('roomresult', result2);
+		
 	});
 
 	
@@ -168,14 +164,13 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 		console.log("leaveroom result : ", result);
 
 		socket.emit('leaveresult', result);
-		// console.log("before leave socket.conn.server.clientsCount : ", socket.conn.server.clientsCount);
+		
 		socket.leave(socket.room);
-		// console.log("after leave socket.conn.server.clientsCount : ", socket.conn.server.clientsCount);
-		console.log("before userlist splice : ", socket.userlist);
-		const idx = socket.userlist.indexOf(u_idx);
+		console.log("before dev3 userlist splice : ", root_io.of(newNsp.name).in(chatroom_idx).userlist);
+		const idx = root_io.of(newNsp.name).in(chatroom_idx).userlist.indexOf(u_idx);
 		if (idx > -1)
-			socket.userlist.splice(idx, 1);
-		console.log("after userlist splice : ", socket.userlist);
+			root_io.of(newNsp.name).in(chatroom_idx).userlist.splice(idx, 1);
+		console.log("after dev3 userlist splice : ", root_io.of(newNsp.name).in(chatroom_idx).userlist);
 
 	});
 
