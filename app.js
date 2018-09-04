@@ -217,6 +217,31 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
 		}
 	});
   
+  socket.on('exitchatroom', async function(data) {
+  	var data = JSON.parse(data);
+  	let u_idx = data.u_idx;
+  	let chatroom_idx = data.chatroom_idx;
+
+  	let messageResult = await chatsql.insertNewMessage(u_idx, chatroom_idx, u_idx, 0, 10);
+
+  	let deleteEndPointQuery = 'DELETE FROM chatroom.endpoint WHERE u_idx = ? AND chatroom_idx = ?';
+    let deleteEndPoint = await db.queryParamCnt_Arr(deleteEndPointQuery, [u_idx, chatroom_idx]);
+
+    let leaveChatroomQuery = 'DELETE FROM tkb.chatroom_joined WHERE chatroom_idx = ? AND u_idx = ?';
+    var leaveChatroom = await db.queryParamCnt_Arr(leaveChatroomQuery, [chatroom_idx, u_idx]);
+    if(!messageResult || !deleteEndPoint || !leaveChatroom) {
+      socket.emit('exitresult', 0);
+    } else {
+      let leftPersonCountQuery = 'SELECT u_idx FROM tkb.chatroom_joined WHERE chatroom_idx = ?';
+      var leftPersonCount = await db.queryParamCnt_Arr(leftPersonCountQuery, [chatroom_idx]);
+      if(leftPersonCount.length === 0) {
+        let deleteChatroomInfoQuery = 'DELETE FROM tkb.group_chatroom WHERE chatroom_idx = ?';
+        var deleteChatroomInfo = await db.queryParamCnt_Arr(deleteChatroomInfoQuery, [chatroom_idx]);
+      }
+      root_io.of(newNsp.name).in(chatroom_idx).emit('exitresult', 1);
+    }
+  });
+
 });
 
 server.listen(3030, function() {
