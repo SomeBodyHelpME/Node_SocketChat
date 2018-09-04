@@ -44,7 +44,7 @@ var server = require('http').createServer(app);
 var root_io = require('socket.io')(server);
 const chatsql = require('./module/chatsql.js');
 const statuscode = require('./module/statuscode.js');
-
+const db = require('./module/pool.js');
 
 // \/(\d+)$
 
