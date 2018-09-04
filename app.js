@@ -238,7 +238,7 @@ root_io.of(/\/(\d+)$/).on('connection', function (socket) {
         let deleteChatroomInfoQuery = 'DELETE FROM tkb.group_chatroom WHERE chatroom_idx = ?';
         var deleteChatroomInfo = await db.queryParamCnt_Arr(deleteChatroomInfoQuery, [chatroom_idx]);
       }
-      root_io.of(newNsp.name).in(chatroom_idx).emit('exitresult', 1);
+      root_io.of(newNsp.name).in(chatroom_idx).emit('exitresult', messageResult);
     }
   });
 
