@@ -114,7 +114,8 @@ module.exports = {
 		if (!getAllMemberCount || !getChatroomCtrlName || !insertMessage) {
 			return false;
 		} else {
-			return {
+
+			let result = {
 				"chatroom_idx" : chatroom_idx,
 				"chat_idx" : insertMessage.insertId,
 				"content" : content,
@@ -123,6 +124,33 @@ module.exports = {
 				"u_idx" : u_idx,
 				"type" : type
 			};
+			let getAllUserQuery = 'SELECT tkb.user.token, tkb.user.u_idx FROM tkb.chatroom_joined JOIN tkb.user USING (u_idx) WHERE tkb.chatroom_joined.chatroom_idx = ? AND tkb.user.u_idx != ?';
+      let getAllUser = await db.queryParamCnt_Arr(getAllUserQuery, [chatroom_idx, u_idx]);
+
+      if (getAllUser) {
+        for (let i = 0 ; i < getAllUser.length ; i++) {
+          let client_token = getAllUser[i].token;
+          
+            message = {
+              to: client_token,
+              data: {
+                data : result
+              },
+              priority: "high",
+              content_available: true
+            };  // message
+          
+          fcm.send(message, function(err, response) {
+            if(err) {
+              console.log("Something has gone wrong!", err);
+            } else {
+              console.log("Successfully sent with response: ", response);
+            }
+          }); // fcm.send
+        } // for
+      } // if (getAllUser)
+
+			return result;
 		}
 	},
 	enterChatroom : async (...args) => {
