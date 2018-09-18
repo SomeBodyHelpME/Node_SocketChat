@@ -3,6 +3,7 @@ const moment = require('moment');
 
 const pool = require('../config/dbPool.js');
 const db = require('./pool.js');
+const statuscode = require('./statuscode.js');
 
 // FCM
 const FCM = require('fcm-node');
@@ -134,7 +135,8 @@ module.exports = {
             message = {
               to: client_token,
               data: {
-                data : result
+                data : statuscode.uploadMessage,
+                result : result
               },
               priority: "high",
               content_available: true
