@@ -125,32 +125,66 @@ module.exports = {
 				"u_idx" : u_idx,
 				"type" : type
 			};
-			let getAllUserQuery = 'SELECT tkb.user.token, tkb.user.u_idx FROM tkb.chatroom_joined JOIN tkb.user USING (u_idx) WHERE tkb.chatroom_joined.chatroom_idx = ? AND tkb.user.u_idx != ?';
-      let getAllUser = await db.queryParamCnt_Arr(getAllUserQuery, [chatroom_idx, u_idx]);
 
-      if (getAllUser) {
-        for (let i = 0 ; i < getAllUser.length ; i++) {
-          let client_token = getAllUser[i].token;
+			let getUsersListInGroupQuery = 'SELECT u_idx FROM tkb.chatroom_joined WHERE chatroom_idx = ? AND u_idx != ?';
+	    var getUsersListInGroup = await db.queryParamCnt_Arr(getUsersListInGroupQuery, [chatroom_idx, u_idx]);
+
+	    if (getUsersListInGroup) {
+	      for(let i = 0 ; i < getUsersListInGroup.length ; i++) {
+	        let getUsersTokenQuery = 'SELECT token FROM tkb.user WHERE u_idx = ?';
+	        var getUsersToken = await db.queryParamCnt_Arr(getUsersTokenQuery, [getUsersListInGroup[i].u_idx]);
+	        
+	        if (getUsersToken) {
+	          let client_token = getUsersToken[0].token;
+
+
+	          var message = { //this may vary according to the message type (single recipient, multicast, topic, et cetera)
+	              to: client_token,
+	              data: {
+	                data : statuscode.uploadMessage,
+                	result : result
+	              },
+	              priority: "high",
+	              content_available: true
+	          };
+
+	          fcm.send(message, function(err, response) {
+	            if(err) {
+	              console.log("Something has gone wrong!", err);
+	            } else {
+	              console.log("Successfully sent with response: ", response);
+	            }
+	          }); // fcm.send
+	        }
+	      }
+	    }
+
+			// let getAllUserQuery = 'SELECT tkb.user.token, tkb.user.u_idx FROM tkb.chatroom_joined JOIN tkb.user USING (u_idx) WHERE tkb.chatroom_joined.chatroom_idx = ? AND tkb.user.u_idx != ?';
+   //    let getAllUser = await db.queryParamCnt_Arr(getAllUserQuery, [chatroom_idx, u_idx]);
+
+   //    if (getAllUser) {
+   //      for (let i = 0 ; i < getAllUser.length ; i++) {
+   //        let client_token = getAllUser[i].token;
           
-            message = {
-              to: client_token,
-              data: {
-                data : statuscode.uploadMessage,
-                result : result
-              },
-              priority: "high",
-              content_available: true
-            };  // message
+   //          message = {
+   //            to: client_token,
+   //            data: {
+   //              data : statuscode.uploadMessage,
+   //              result : result
+   //            },
+   //            priority: "high",
+   //            content_available: true
+   //          };  // message
           
-          fcm.send(message, function(err, response) {
-            if(err) {
-              console.log("Something has gone wrong!", err);
-            } else {
-              console.log("Successfully sent with response: ", response);
-            }
-          }); // fcm.send
-        } // for
-      } // if (getAllUser)
+   //        fcm.send(message, function(err, response) {
+   //          if(err) {
+   //            console.log("Something has gone wrong!", err);
+   //          } else {
+   //            console.log("Successfully sent with response: ", response);
+   //          }
+   //        }); // fcm.send
+   //      } // for
+   //    } // if (getAllUser)
 
 			return result;
 		}
