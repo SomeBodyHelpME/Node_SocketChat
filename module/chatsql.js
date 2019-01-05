@@ -231,6 +231,72 @@ module.exports = {
 			}
 		}
 	},
+	fcmSendWhenMakeThings : async (...args) => {
+    let u_idx = args[0];
+    let chatroom_idx = args[1];
+    let status = args[2];
+    let index = args[3];
+    let chat_idx = args[4];
+    var flag = true;
+
+    let getUsersListInGroupQuery = 'SELECT u_idx FROM tkb.chatroom_joined WHERE chatroom_idx = ? AND u_idx != ?';
+    var getUsersListInGroup = await db.queryParamCnt_Arr(getUsersListInGroupQuery, [chatroom_idx, u_idx]);
+
+    if (getUsersListInGroup) {
+      for(let i = 0 ; i < getUsersListInGroup.length ; i++) {
+        let getUsersTokenQuery = 'SELECT token FROM tkb.user WHERE u_idx = ?';
+        var getUsersToken = await db.queryParamCnt_Arr(getUsersTokenQuery, [getUsersListInGroup[i].u_idx]);
+        
+        if (getUsersToken) {
+          let client_token = getUsersToken[0].token;
+
+
+          var message = { //this may vary according to the message type (single recipient, multicast, topic, et cetera)
+              to: client_token,
+              data: {
+                data : status,
+                chatroom_idx : chatroom_idx,
+                index : index,
+                chat_idx : chat_idx
+              },
+              priority: "high",
+              content_available: true
+          };
+
+          message.data.title = '팀플의 요정';   //제목
+          if (status === statuscode.makeNotice) {
+            message.data.body = '공지가 등록되었습니다!!';  //보낼메시지
+          } else if (status === statuscode.makeLights) {
+            message.data.body = '신호등이 등록되었습니다!!';  //보낼메시지
+          } else if (status === statuscode.makeVote) {
+            message.data.body = '투표가 등록되었습니다!!';  //보낼메시지
+          } else if (status === statuscode.makeRole) {
+            message.data.body = '역할분담이 등록되었습니다!!';  //보낼메시지
+          }
+
+          fcm.send(message, function(err, response) {
+            if(err) {
+              console.log("Something has gone wrong!", err);
+              // flag = false;
+            } else {
+              console.log("Successfully sent with response: ", response);
+            }
+          });//fcm.send
+          // if(!flag) break;
+        }  
+        
+      }
+        
+        
+    }
+   
+    if (!getUsersListInGroup) {
+      return false;
+    } else {
+      return true;
+    }
+    // return flag;
+  }, // fcmSendWhenMakeThings
 	uploadSingleFile : async (...args) => {
 		let u_idx = args[0];
 		let chatroom_idx = args[1];
