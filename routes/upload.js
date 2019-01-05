@@ -131,7 +131,7 @@ router.post('/video', upload.single('video'), async(req, res, next) => {
 	var video = null;
 	if (!req.file) {
 		res.status(400).send({
-			message : "No Photo"
+			message : "No Video"
 		});
 	} else {
 		video = req.file.location;
